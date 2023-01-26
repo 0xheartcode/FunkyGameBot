@@ -33,9 +33,9 @@ pub async fn current_active_season(pool: &DbPool) -> Result<Option<String>, Rusq
 }
 
 // Function to check if a season is running and return its id
-pub async fn current_active_season_id(pool: &DbPool) -> Result<Option<String>, RusqliteError> {
+pub async fn current_active_season_id(pool: &DbPool) -> Result<Option<i32>, RusqliteError> {
     let conn = pool.get().expect("Failed to get connection from pool");
-    let season_id: Option<String> = conn.query_row(
+    let season_id: Option<i32> = conn.query_row(
         "SELECT id FROM seasons WHERE is_active = true LIMIT 1",
         [],
         |row| row.get(0),
@@ -120,4 +120,82 @@ pub async fn stop_gaming_phase(pool: &DbPool) -> Result<(), RusqliteError> {
     } else {
         Ok(())
     }
+}
+
+
+// Function to get the next round number for the current active season
+pub async fn get_next_round_number(pool: &DbPool, current_season_id: &i32) -> Result<i32, RusqliteError> {
+    let conn = pool.get().expect("Failed to get connection from pool");
+
+    // Fetch the highest round number for the current season
+    let mut stmt = conn.prepare("SELECT MAX(round_number) FROM MasterRoundTable WHERE season_id = ?1")?;
+    println!("ZZZ");
+    let max_round_number: i32 = conn.query_row(
+        "SELECT IFNULL(MAX(round_number), 0) FROM MasterRoundTable WHERE season_id = ?1",
+        params![current_season_id],
+        |row| row.get(0),
+    )?;
+
+    // Return 1 if no rounds exist, or the next round number if rounds do exist
+    Ok(max_round_number + 1)
+
+}
+
+
+pub async fn start_new_round(pool: &DbPool, current_active_season_id_variable: i32, next_round_number_variable: i32) -> Result<(), RusqliteError> {
+    let mut conn = pool.get().expect("Failed to get connection from pool");
+
+    // Start a transaction
+    let tx = conn.transaction()?;
+
+    // Insert a new round into MasterRoundTable
+    tx.execute(
+        "INSERT INTO MasterRoundTable (season_id, round_number, start_time) VALUES (?1, ?2, CURRENT_TIMESTAMP)",
+        params![current_active_season_id_variable, next_round_number_variable],
+    )?;
+
+    // Update the status in the Seasons table
+    let rows_updated = tx.execute(
+        "UPDATE Seasons SET status = 'round_ongoing' WHERE id = ?1 AND status = 'start_gaming'",
+        params![current_active_season_id_variable],
+    )?;
+
+    if rows_updated == 0 {
+        // No rows were updated
+        Err(RusqliteError::QueryReturnedNoRows) // or a custom error
+    } else {
+        // Commit the transaction
+        tx.commit()?;
+        Ok(())
+    }    
+}
+
+
+pub async fn end_current_round(pool: &DbPool, current_active_season_id_variable: i32) -> Result<(), RusqliteError> {
+    let mut conn = pool.get().expect("Failed to get connection from pool");
+
+    // Start a transaction
+    let tx = conn.transaction()?;
+
+    // Insert a new round into MasterRoundTable
+    tx.execute(
+        "UPDATE MasterRoundTable SET end_time = CURRENT_TIMESTAMP WHERE season_id = ?1 AND end_time IS NULL",
+        params![current_active_season_id_variable],
+    )?;
+
+    // Update the status in the Seasons table
+    let rows_updated = tx.execute(
+        "UPDATE Seasons SET status = 'start_gaming' WHERE id = ?1 AND status = 'round_ongoing'",
+        params![current_active_season_id_variable],
+    )?;
+
+    if rows_updated == 0 {
+        // No rows were updated
+        Err(RusqliteError::QueryReturnedNoRows) // or a custom error
+    } else {
+        // Commit the transaction
+        tx.commit()?;
+        Ok(())
+    }
+        
 }

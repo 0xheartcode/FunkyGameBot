@@ -25,6 +25,9 @@ use crate::commands::season::{
     stop_signup_phase,
     start_gaming_phase,
     stop_gaming_phase,
+    get_next_round_number,
+    start_new_round,
+    end_current_round,
 };
 
 //
@@ -229,6 +232,9 @@ pub async fn startsignupphase_command(bot: Bot, msg: Message, db_pool: &Arc<DbPo
                 "start_signup" => {
                     bot.send_message(msg.chat.id, "Signup has already started.").await?;
                 },
+                "round_ongoing" => {
+                    bot.send_message(msg.chat.id, "A round is going on, you cannot start signing up.").await?;
+                },
                 "start_gaming" => {
                     bot.send_message(msg.chat.id, "The game has already started. We cannot open the signup now. Let's be fair.").await?;
                 },
@@ -271,6 +277,9 @@ pub async fn stopsignupphase_command(bot: Bot, msg: Message, db_pool: &Arc<DbPoo
             match status.as_str() {
                 "stopped_signup" => {
                     bot.send_message(msg.chat.id, "Signup has already stopped!").await?;
+                },
+                "round_ongoing" => {
+                    bot.send_message(msg.chat.id, "A round is going on, you cannot stop signing up.").await?;
                 },
                 "start_gaming" => {
                     bot.send_message(msg.chat.id, "The game has already started. This command is not valid.").await?;
@@ -315,6 +324,9 @@ pub async fn startgamingphase_command(bot: Bot, msg: Message, db_pool: &Arc<DbPo
                 "start_gaming" => {
                     bot.send_message(msg.chat.id, "The game has already started!").await?;
                 },
+                "round_ongoing" => {
+                    bot.send_message(msg.chat.id, "A round is going on, you cannot start gaming phase.").await?;
+                },
                 "start_signup" => {
                     bot.send_message(msg.chat.id, "The signup phase has not been completed. Please finish it first.").await?;
                 },
@@ -357,6 +369,9 @@ pub async fn stopgamingphase_command(bot: Bot, msg: Message, db_pool: &Arc<DbPoo
                 "stopped_gaming" => {
                     bot.send_message(msg.chat.id, "The game has already started!").await?;
                 },
+                "round_ongoing" => {
+                    bot.send_message(msg.chat.id, "A round is going on, you cannot stop gaming phase.").await?;
+                },
                 "stopped_signup" => {
                     bot.send_message(msg.chat.id, "Oh, the signup is closed, however, the game hasn't started yet. Start a game to close it.").await?;
                 },
@@ -394,24 +409,68 @@ pub async fn stopgamingphase_command(bot: Bot, msg: Message, db_pool: &Arc<DbPoo
 // TODO C
 //
 pub async fn start_round_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
-        if !is_authorized_sender(&msg, db_pool) {
+    if !is_authorized_sender(&msg, db_pool) {
         return Ok(());  // Early return if the sender is not authorized
     }
-    bot.send_message(msg.chat.id, "Finally, let us start the round !").await?;
+
+    // Check the current season's status
+    let season_details = current_active_season_details(db_pool).await?;
+    if let Some((_, _, _, status)) = season_details {
+        if status != "start_gaming" {
+            bot.send_message(msg.chat.id, "There is no active season in the 'start_gaming' phase.").await?;
+            return Ok(());
+        }
+    } else {
+        bot.send_message(msg.chat.id, "No active season found.").await?;
+        return Ok(());
+    }
+
+    // Get the current active season ID
+    println!("000");
+    let current_season_id = current_active_season_id(db_pool).await?;
+    println!("AAA");
+    if let Some(season_id_str) = current_season_id {
+        // Get the next round number
+        println!("BBB");
+        let next_round_number = get_next_round_number(db_pool, &season_id_str).await?;
+        println!("CCC");
+
+        // Start the new round
+        start_new_round(db_pool, season_id_str, next_round_number).await?;
+        println!("DDD");
+        bot.send_message(msg.chat.id, "Finally, let us start the round!").await?;
+    } else {
+        bot.send_message(msg.chat.id, "No active season ID found.").await?;
+    }
+
     Ok(())
 }
 
 pub async fn stop_round_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
-        if !is_authorized_sender(&msg, db_pool) {
+    if !is_authorized_sender(&msg, db_pool) {
         return Ok(());  // Early return if the sender is not authorized
     }
-    bot.send_message(msg.chat.id, "Round is over, everyone back to their corner !").await?;
+
+    // Check the current season's status
+    let season_details = current_active_season_details(db_pool).await?;
+    if season_details.is_none() || season_details.unwrap().3 != "round_ongoing" {
+        bot.send_message(msg.chat.id, "There is no active season in the 'round_ongoing' phase.").await?;
+        return Ok(());
+    }
+
+    // Get the current active round's ID
+    let current_season_id = current_active_season_id(db_pool).await?;
+    if let Some(round_id) = current_season_id {
+        // End the current round
+        end_current_round(db_pool, round_id).await?;
+
+        bot.send_message(msg.chat.id, "Round is over, everyone back to their corner!").await?;
+    } else {
+        bot.send_message(msg.chat.id, "No active season ID found.").await?;
+    }
+
     Ok(())
 }
-
-
-
-
 
 
 // TODO GOAL D
