@@ -6,7 +6,6 @@
 	- [X] Copy workflow.yml
 	- [X] Create folder structure
 	- [X] Makefile
-- [ ] Protected Server Branch
 	
 ---
 - [ ] Basic Bot with Rust
