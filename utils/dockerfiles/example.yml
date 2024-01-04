@@ -1,0 +1,10 @@
+version: '3'
+services:
+  # MakefileServiceName
+  example-service: # Description goes here.
+    build:
+      context: ../../
+      dockerfile: ./utils/dockerfiles/Dockerfile.example
+    ports:
+      -  ${PORT}:80
+
