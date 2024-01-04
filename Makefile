@@ -108,6 +108,11 @@ echo_docker_image_name: ## Prints the image name.
 echo_foldername: ## Prints the foldername.
 	@echo -n $(DOCKER_NAME)
 
+.PHONY: token_rust_setup
+token_rust_setup: ## Setup the token for rust
+	@source .env
+
+
 ## ===================
 ##@ Docker Compose
 
