@@ -110,7 +110,20 @@ echo_foldername: ## Prints the foldername.
 
 .PHONY: token_rust_setup
 token_rust_setup: ## Setup the token for rust
-	@source .env
+	@echo "Sourcing .env file"
+	@./utils/scripts/export_env.sh && echo "Environment variables sourced successfully"
+
+.PHONY: mongo_start
+mongo_start: ## Start the db
+	@sudo service mongod start
+
+.PHONY: mongo_status
+mongo_status: ## Status of the db
+	@sudo service mongod status
+
+.PHONY: mongo_stop
+mongo_stop: ## Stop the db
+	@sudo service mongod stop
 
 
 ## ===================
