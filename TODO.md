@@ -8,16 +8,19 @@
 	- [X] Makefile
 	
 ---
-- [ ] Basic Bot with Rust
+- [X] Basic Bot with Rust
 - [ ] Basic Bot with Rust + Docker
 
-- [ ] Basic Bot with Rust and MongoDB
-- [ ] Basic Bot with Rust and MongoDB + Docker Compose
+- [X] Basic Bot with Rust and SQLlite
+- [ ] Basic Bot with Rust and SQLlite + Docker Compose
 
-- [ ] Basic Bot with Rust and MongoDB in CI/CD
+- [ ] Basic Bot with Rust and SQLlite in CI/CD
 - [ ] CI/CD connected to my remote cloud server.
 
 ---
 - Implement the game logic, step by step.
 - Sunday
 
+
+---
+- Further: use MongoDB instead of SQLlite
