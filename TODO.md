@@ -9,18 +9,16 @@
 	
 ---
 - [X] Basic Bot with Rust
-- [ ] Basic Bot with Rust + Docker
-
 - [X] Basic Bot with Rust and SQLlite
-- [ ] Basic Bot with Rust and SQLlite + Docker Compose
+- [X] No Docker, Rust + SQLlite inconvenient at the moment.
 
 - [ ] Basic Bot with Rust and SQLlite in CI/CD
 - [ ] CI/CD connected to my remote cloud server.
-
 ---
 - Implement the game logic, step by step.
-- Sunday
+- Friday
 
 
 ---
 - Further: use MongoDB instead of SQLlite
+- Docker
