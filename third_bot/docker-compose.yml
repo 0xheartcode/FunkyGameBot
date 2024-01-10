@@ -1,8 +1,0 @@
-version: "3"
-services:
-  hello-world-rust:
-    build:
-      context: .
-    image: third_bot_latest  # Replace with your desired image name
-    # Add other configurations if needed
-

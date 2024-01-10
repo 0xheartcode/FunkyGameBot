@@ -21,4 +21,6 @@
 
 ---
 - Further: use MongoDB instead of SQLlite
-- Docker
+- Docker:
+https://www.reddit.com/r/rust/comments/126xeyx/exploring_the_problem_of_faster_cargo_docker/
+https://github.com/LukeMathWalker/cargo-chef
