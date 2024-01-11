@@ -2,6 +2,7 @@ name: SSH Checkout Workflow
 
 env:
   FOLDER_NAME: FunkyGameBot
+  MAIN_BOT_FOLDER: third_bot
 
 on:
   workflow_dispatch:
@@ -10,10 +11,10 @@ on:
       - server
 
 jobs:
-  basic_job:
+  git_pull:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup SSH and deploy
+      - name: Server Git Pull
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.REMOTE_HOST }}
@@ -23,3 +24,26 @@ jobs:
           script: |
             ls
             cd Desktop/$FOLDER_NAME
+            if git pull origin server; then
+              echo "Git pull successful."
+              ls
+            else
+              echo "Error: Git pull failed."
+              exit 888  # Exit with a non-zero status code to indicate failure
+            fi
+  rust_release_run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Server Cargo Run --Release
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            ls
+            cd Desktop/$FOLDER_NAME
+            cd $MAIN_BOT_FOLDER
+            source .env # Would need to copy the .env file in variables / secrets/
+            cargo run --release
