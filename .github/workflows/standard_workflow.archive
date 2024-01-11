@@ -1,0 +1,129 @@
+name: SSH Checkout Workflow
+
+env:
+  FOLDER_NAME: FunkyGameBot
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - server
+
+jobs:
+  basic_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH and deploy
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            #cd $FOLDER_NAME
+            ls
+
+            # Failsafe
+            # Log GitHub variables
+            # Docs: https://docs.github.com/en/actions/learn-github-actions/contexts
+
+            # The short ref name of the branch or tag that triggered the workflow run.
+            # This value matches the branch or tag name shown on GitHub. For example, feature-branch-1.
+            # For pull requests, the format is refs/pull/<pr_number>/merge.
+            echo "GitHub Ref Name: ${{ github.ref_name }}"
+
+            # The fully-formed ref of the branch or tag that triggered the workflow run.
+            # For workflows triggered by push, this is the branch or tag ref that was pushed.
+            # For workflows triggered by pull_request, this is the pull request merge branch.
+            echo "GitHub Ref: ${{ github.ref }}"
+
+            # The Git URL to the repository. For example, git://github.com/octocat/hello-world.git.
+            echo "GitHub Repository URL: ${{ github.repositoryUrl }}"
+
+            # The base_ref or target branch of the pull request in a workflow run.
+            # This property is only available when the event that triggers a workflow run,
+            # is either pull_request or pull_request_target
+
+            # == SANDBOX ==
+            if [[ "${{ github.ref_name }}" == 'sandbox' ]]; then
+              echo "Entering sandbox..."
+              REPO_PATH="/home/${{ secrets.SANDBOX_REMOTE_USERNAME }}/${{ github.ref_name }}/"
+              BRANCH_NAME=${{ github.ref_name }}
+              echo "Repository Path = $REPO_PATH"
+            # == STAGING ==
+            # == PROD ==
+            elif [ -n "${{ github.base_ref }}" ]; then
+              echo "GitHub Base Ref: ${{ github.base_ref }}"
+              echo "github.base_ref does exist!"
+              REPO_PATH="/home/${{ secrets.STAGING_PROD_REMOTE_USERNAME }}/${{ github.base_ref }}/"
+              BRANCH_NAME=${{ github.base_ref }}
+              echo "Repository Path = $REPO_PATH"
+            else
+              echo "github.base_ref does not exist."
+            fi
+
+            if [ -e "$REPO_PATH" ]; then
+              echo "Path exists. Performing git pull."
+              REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+              FULLGIT_PATH="$REPO_PATH$REPO_NAME/"
+              cd "$REPO_PATH$REPO_NAME/"
+              if [ -n "${{ github.base_ref }}" ]; then
+                CURRENT_BRANCH=${{ github.base_ref }}
+              elif [[ "${{ github.ref_name }}" == 'sandbox' ]]; then
+                CURRENT_BRANCH=${{ github.ref_name }}
+              else
+                echo "github branch not found does not exist."
+                exit 994
+              fi
+              # Pulls the current branch. This will change if you change the branch in remote
+              if git pull origin $CURRENT_BRANCH; then
+                echo "Git pull successful."
+              else
+                echo "Error: Git pull failed."
+                exit 888  # Exit with a non-zero status code to indicate failure
+              fi
+            else
+              echo "Path does not exist. Creating path and cloning repository."
+              mkdir -p $REPO_PATH
+              echo "Path created."
+              cd $REPO_PATH
+              original_url=${{ github.repositoryUrl }}
+              GIT_SSH_URL="git@$(echo $original_url | sed 's/git:\/\///' | sed 's/\//:/')"
+              echo "Transformed Git URL: $GIT_SSH_URL"
+              echo "git clone -b $BRANCH_NAME -v $GIT_SSH_URL"
+              if timeout 20 git clone -b $BRANCH_NAME -v $GIT_SSH_URL; then
+                echo "Git clone successful."
+              else
+                echo "Error: Git clone failed or timeout."
+                exit 998  # Exit with a non-zero status code to indicate failure
+              fi
+            fi
+
+            # TODO fix this part, IF MERGE
+            if [ -n "${{ github.base_ref }}" ]; then
+              echo "Synchronizing git merge."
+              echo "pwd:"
+              REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+              cd "$REPO_NAME/"
+              pwd
+              # Origin branch
+              echo "github.head_ref: ${{ github.head_ref }}"
+              # Target branch
+              echo "github.base_ref: ${{ github.base_ref }}"
+              git checkout ${{ github.head_ref }}
+              git reset --hard ${{ github.base_ref }}
+              git push origin ${{ github.head_ref }} --force
+
+              if [ "${{ github.base_ref }}" == "prod" ] && [ "${{ github.head_ref }}" != "sandbox" ]; then
+                echo "Resetting to 'sandbox' because base_ref is 'prod' and head_ref is not 'sandbox'."
+                git checkout sandbox
+                git reset --hard ${{ github.base_ref }}
+                git push origin sandbox --force
+              fi
+
+              git checkout ${{ github.base_ref }}
+              git push
+              echo "This script may not work. Unsure. Later work."
+            fi
+
