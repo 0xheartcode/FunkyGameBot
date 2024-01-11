@@ -22,4 +22,4 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             ls
-            #cd $FOLDER_NAME
+            cd Desktop/$FOLDER_NAME
