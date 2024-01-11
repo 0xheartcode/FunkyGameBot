@@ -1,6 +1,7 @@
 # Ignore files inside the dockerImages folder, but keep the folder
 dockerImages/*.tar
 
+Cargo.lock
 # Created by .ignore support plugin (hsz.mobi)
 
 ### remix ###

@@ -1,15 +1,14 @@
 [package]
-name = "rust_telegram_bot"
+name = "third_bot"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-teloxide = { version = "0.12", features = ["macros"] }
+teloxide = { version = "0.12", features = ["macros", "bincode-serializer",  "redis-storage", "sqlite-storage"] }
 log = "0.4"
 pretty_env_logger = "0.4"
 tokio = { version =  "1.8", features = ["rt-multi-thread", "macros"] }
-[dependencies.mongodb]
-version = "2.8.0"
-features = ["tokio-sync"]
+serde = "1"
+

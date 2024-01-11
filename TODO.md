@@ -6,19 +6,21 @@
 	- [X] Copy workflow.yml
 	- [X] Create folder structure
 	- [X] Makefile
-- [ ] Protected Server Branch
 	
 ---
-- [ ] Basic Bot with Rust
-- [ ] Basic Bot with Rust + Docker
+- [X] Basic Bot with Rust
+- [X] Basic Bot with Rust and SQLlite
+- [X] No Docker, Rust + SQLlite inconvenient at the moment.
 
-- [ ] Basic Bot with Rust and MongoDB
-- [ ] Basic Bot with Rust and MongoDB + Docker Compose
-
-- [ ] Basic Bot with Rust and MongoDB in CI/CD
+- [ ] Basic Bot with Rust and SQLlite in CI/CD
 - [ ] CI/CD connected to my remote cloud server.
-
 ---
 - Implement the game logic, step by step.
-- Sunday
+- Friday
 
+
+---
+- Further: use MongoDB instead of SQLlite
+- Docker:
+https://www.reddit.com/r/rust/comments/126xeyx/exploring_the_problem_of_faster_cargo_docker/
+https://github.com/LukeMathWalker/cargo-chef
