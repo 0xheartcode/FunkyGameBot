@@ -12,7 +12,6 @@ on:
 jobs:
   basic_job:
     runs-on: ubuntu-latest
-
     steps:
       - name: Setup SSH and deploy
         uses: appleboy/ssh-action@v1.0.0
