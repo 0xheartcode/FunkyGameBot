@@ -3,8 +3,8 @@
 
 use teloxide::{
     dispatching::dialogue::{
-        serializer::{Bincode, Json},
-        ErasedStorage, RedisStorage, SqliteStorage, Storage,
+        serializer::{Json},
+        ErasedStorage, SqliteStorage, Storage,
     },
     prelude::*,
     utils::command::BotCommands,
@@ -29,6 +29,8 @@ pub enum Command {
     Get,
     /// Reset your number.
     Reset,
+    /// Greet the user.
+    HelloWorld,
 }
 
 #[tokio::main]
@@ -38,11 +40,7 @@ async fn main() {
 
     let bot = Bot::from_env();
 
-    let storage: MyStorage = if std::env::var("DB_REMEMBER_REDIS").is_ok() {
-        RedisStorage::open("redis://127.0.0.1:6379", Bincode).await.unwrap().erase()
-    } else {
-        SqliteStorage::open("db.sqlite", Json).await.unwrap().erase()
-    };
+    let storage: MyStorage = SqliteStorage::open("db.sqlite", Json).await.unwrap().erase();
 
     let handler = Update::filter_message()
         .enter_dialogue::<Message, ErasedStorage<State>, State>()
@@ -63,6 +61,9 @@ async fn main() {
 
 async fn start(bot: Bot, dialogue: MyDialogue, msg: Message) -> HandlerResult {
     match msg.text().map(|text| text.parse::<i32>()) {
+        Some(text) if text == "/helloworld" => {
+            bot.send_message(msg.chat.id, "Hello user!").await?;
+        }
         Some(Ok(n)) => {
             dialogue.update(State::GotNumber(n)).await?;
             bot.send_message(
@@ -93,6 +94,9 @@ async fn got_number(
         Command::Reset => {
             dialogue.reset().await?;
             bot.send_message(msg.chat.id, "Number reset.").await?;
+        }
+        Command::HelloWorld => {
+            bot.send_message(msg.chat.id, "Hello user!").await?;
         }
     }
     Ok(())
