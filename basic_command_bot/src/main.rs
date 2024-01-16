@@ -1,8 +1,4 @@
 use teloxide::{
-    dispatching::dialogue::{
-        serializer::{Bincode, Json},
-        ErasedStorage, SqliteStorage, Storage,
-    },
     prelude::*,
     utils::command::BotCommands,
 };
@@ -10,16 +6,9 @@ use chrono::{Local, DateTime};
 mod admin;
 use admin::{add_admin, remove_admin, list_admins, is_admin};
 
-type MyDialogue = Dialogue<State, ErasedStorage<State>>;
-type MyStorage = std::sync::Arc<ErasedStorage<State>>;
-type HandlerResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
-
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
-pub enum State {
-    #[default]
-    Start,
-    GotNumber(i32),
-}
+mod database;
+use database::{init_db_pool, write_to_db, read_from_db};
+use std::sync::Arc;
 
 #[tokio::main]
 async fn main() {
@@ -27,11 +16,11 @@ async fn main() {
     let now: DateTime<Local> = Local::now();
     log::info!("Starting command bot...");
     log::info!("Starting timestamp: {}...", now.format("%Y-%m-%d %H:%M:%S %:z"));
-    //let database_manager = DatabaseManager::new("my_database.db").expect("Failed to initialize the database manager");
+    let db_pool = Arc::new(init_db_pool());     //let database_manager = DatabaseManager::new("my_database.db").expect("Failed to initialize the database manager");
     let bot = Bot::from_env();
-    let storage: MyStorage = SqliteStorage::open("db.sqlite", Json).await.unwrap().erase();
+    Command::repl_with(bot, move |bot, msg, cmd| answer(bot, msg, cmd, db_pool.clone())).await;
 
-    Command::repl(bot, answer).await;
+    //Command::repl(bot, answer).await;
 }
 
 #[derive(BotCommands, Clone)]
@@ -72,7 +61,7 @@ enum AdminCommand {
     ListAdmins,
 }
 
-async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
+async fn answer(bot: Bot,msg: Message, cmd: Command, db_pool: Arc<database::DbPool>) -> ResponseResult<()> {
     let _ = match cmd {
         //
         // basic commands
@@ -107,11 +96,16 @@ async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
             Ok::<(), Box<dyn std::error::Error>>(())    
         }
         Command::Writesql => {
+            let chat_id = msg.chat.id;
+            // Respond to the user
+            database::write_to_db("Some value").await.expect("Failed to write to the database");
             bot.send_message(msg.chat.id, "writing to database...").await?;
             Ok::<(), Box<dyn std::error::Error>>(())
         }
         Command::Readsql => {
+            let value = database::read_from_db().await.expect("Failed to read from the database");
             bot.send_message(msg.chat.id, "reading from database...").await?;
+            bot.send_message(msg.chat.id, format!("The value is {}.", value)).await?;
             Ok::<(), Box<dyn std::error::Error>>(())
         }
         //
