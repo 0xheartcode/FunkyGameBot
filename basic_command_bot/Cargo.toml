@@ -12,7 +12,9 @@ tokio = { version =  "1.8", features = ["rt-multi-thread", "macros"] }
 chrono = { version = "0.4", features = ["serde"] }
 lazy_static = "1.4.0"
 serde = "1"
-sled = "0.34.7"
 rusqlite = "0.30.0"
 r2d2 = "0.8.10"
 r2d2_sqlite = "0.23.0"  # Make sure this version is compatible with your rusqlite version
+tokio-stream = "0.1.7"
+dotenv = "0.15"
+
