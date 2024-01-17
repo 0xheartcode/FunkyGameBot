@@ -1,13 +1,12 @@
 use teloxide::{
-    dispatching::{dialogue, dialogue::InMemStorage, UpdateHandler},
+    dispatching::{UpdateHandler},
+    //dispatching::{dialogue, dialogue::InMemStorage, UpdateHandler},
     prelude::*,
     utils::command::BotCommands,
 };
-use std::{env, error::Error};
-use dotenv::dotenv;
-
-type HandlerResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
-
+use std::{error::Error};
+//use dotenv::dotenv;
+//type HandlerResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
 //use tokio_stream::wrappers::UnboundedReceiverStream;
 
 use chrono::{Local, DateTime};
@@ -39,7 +38,15 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
     use dptree::case;
 
     let command_handler = teloxide::filter_command::<Command, _>()
+        //
+        //BasicCommands
+        //
         .branch(case![Command::Help].endpoint(help))
+        .branch(case![Command::Signup].endpoint(signup_command))
+        .branch(case![Command::Version].endpoint(version_command))
+        //
+        //DevCommands
+        //
         .branch(case![Command::Username].endpoint(username_command))
         .branch(case![Command::UsernameAndAge].endpoint(username_and_age_command))
         .branch(dptree::case![Command::Writesql(value)].endpoint(
@@ -50,6 +57,21 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
                 |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
             read_sql_command(bot, msg, db_pool).await
         }))
+        //
+        //AdminCommands
+        //
+        .branch(case![Command::StartNewSeason].endpoint(startnewseason_command))
+        .branch(case![Command::StopNewSeason].endpoint(stopnewseason_command))
+        .branch(case![Command::StartSignupPhase].endpoint(startsignupphase_command))
+        .branch(case![Command::StopSignupPhase].endpoint(stopsignupphase_command))
+        .branch(case![Command::StartGamingPhase].endpoint(startgamingphase_command))
+        .branch(case![Command::StopGamingPhase].endpoint(stopgamingphase_command))
+        .branch(case![Command::ApprovePlayer].endpoint(approveplayer_command))
+        .branch(case![Command::RefusePlayer].endpoint(refuseplayer_command))
+        .branch(case![Command::ViewSignupList].endpoint(viewsignuplist_command))
+        .branch(case![Command::ViewApprovedList].endpoint(viewapprovedlist_command))
+        .branch(case![Command::ViewRefusedList].endpoint(viewrefusedlist_command))
+        .branch(case![Command::ViewLeaderboard].endpoint(viewleaderboard_command))
         .branch(case![Command::ListAdmins].endpoint(list_admins_command))
         .branch(
             dptree::case![Command::AddAdmin(username)]
@@ -75,15 +97,25 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
 #[derive(BotCommands, Clone)]
 #[command(rename_rule = "lowercase", description = "These commands are supported:")]
 enum Command {
-    #[command(description = "display this text.")]
+    //
+    //BasicCommands
+    //
+    #[command(description = "Display this text.")]
     Help,
-    #[command(description = "displays a username.")]
+    #[command(description = "Register for a new game season.")]
+    Signup,
+    #[command(description = "Get the current version.")]
+    Version,
+    //
+    //DevCommands
+    //
+    #[command(description = "off")]
     Username,
-    #[command(description = "basic auth test.")]
+    #[command(description = "off")]
     UsernameAndAge,
-    #[command(description = "Write to sqllite db.")]
+    #[command(description = "off")]
     Writesql(String),
-    #[command(description = "Read from sqllite db.")]
+    #[command(description = "off")]
     Readsql,
     //
     //AdminCommands
@@ -97,36 +129,133 @@ enum Command {
     //#[command(description = "list admin users.")]
     #[command(description = "off")]
     ListAdmins,
+    #[command(description = "off")]
+    StartNewSeason,
+    #[command(description = "off")]
+    StopNewSeason,
+    #[command(description = "off")]
+    StartSignupPhase,
+    #[command(description = "off")]
+    StopSignupPhase,
+    #[command(description = "off")]
+    StartGamingPhase,
+    #[command(description = "off")]
+    StopGamingPhase,
+    #[command(description = "off")]
+    ApprovePlayer,
+    #[command(description = "off")]
+    RefusePlayer,
+    #[command(description = "off")]
+    ViewSignupList,
+    #[command(description = "off")]
+    ViewApprovedList,
+    #[command(description = "off")]
+    ViewRefusedList,
+    #[command(description = "off")]
+    ViewLeaderboard,
 }
 
 #[derive(BotCommands, Clone)]
-#[command(rename_rule = "lowercase", description = "These 🌟Admin🌟 commands are supported:")]
+#[command(rename_rule = "lowercase", description = "These 🌟 Admin 🌟 commands are supported:")]
 enum AdminCommand {
     #[command(description = "add a user to the admin list.")]
     AddAdmin(String),
     #[command(description = "remove a user from the admin list.")]
     RemoveAdmin(String),
-    #[command(description = "list admin users.")]
+    #[command(description = "list admin users.
+
+        ")]
     ListAdmins,
+    #[command(description = "Start a new season for the rock-paper-scissors game.")]
+    StartNewSeason,
+    #[command(description = "Stop the current season of the rock-paper-scissors game.")]
+    StopNewSeason,
+    #[command(description = "Begin the signup phase for players.")]
+    StartSignupPhase,
+    #[command(description = "End the signup phase for players.")]
+    StopSignupPhase,
+    #[command(description = "Start the gaming phase.")]
+    StartGamingPhase,
+
+    #[command(description = "Stop the gaming phase.
+
+        ")]
+    StopGamingPhase,
+    #[command(description = "View the list of players who signed up.")]
+    ViewSignupList,
+    #[command(description = "View the list of approved players.")]
+    ViewApprovedList,
+    #[command(description = "View the list of refused players.
+
+        ")]
+    ViewRefusedList,
+    #[command(description = "Approve a player's signup request.")]
+    ApprovePlayer,
+    #[command(description = "Refuse a player's signup request.
+
+        ")]
+    RefusePlayer,
+    #[command(description = "View the current leaderboard.")]
+    ViewLeaderboard,
 }
 
+#[derive(BotCommands, Clone)]
+#[command(rename_rule = "lowercase", description = "These 🤖 Dev 🤖 commands are supported:")]
+enum DevCommand {
+    #[command(description = "displays a username.")]
+    Username,
+    #[command(description = "basic auth test.")]
+    UsernameAndAge,
+    #[command(description = "Write to sqllite db.")]
+    Writesql(String),
+    #[command(description = "Read from sqllite db.")]
+    Readsql,
+}
+//
+//
+//TODO BasicCommands
+//
+//====================================================
 
 async fn help(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
-    let requester_username = msg.from().and_then(|user| user.username.clone()).unwrap_or_default();
-    let is_admin = is_admin(&requester_username);
-
-    if is_admin {
-        // Send admin command descriptions if the user is an admin.
+    if is_authorized_dev(&msg) {
+        bot.send_message(msg.chat.id, DevCommand::descriptions().to_string()).await?;
+    }
+    if is_authorized_sender(&msg) {
         bot.send_message(msg.chat.id, AdminCommand::descriptions().to_string()).await?;
     }
-
-    // Send general command descriptions to all users.
     bot.send_message(msg.chat.id, Command::descriptions().to_string()).await?;
-
     Ok(())
 }
 
+// TODO implement function
+async fn signup_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+    bot.send_message(msg.chat.id, "You may want to sign up to a game. Bot is being built.").await?;
+    Ok(())
+}
+
+// TODO enable checking the Cargo.toml file for version.
+async fn version_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+    bot.send_message(msg.chat.id, "The current version of the bot is v0.0.1.").await?;
+    Ok(())
+}
+//
+//TODO DevCommands
+//
+//====================================================
+fn is_authorized_dev(msg: &Message) -> bool {
+    if let Some(true_sender_username) = msg.from().and_then(|user| user.username.as_ref()) {
+        true_sender_username == "juno0x153" 
+    } else {
+        false
+    }
+}
+
+
 async fn username_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+    if !is_authorized_dev(&msg) { return Ok(());} //check is dev
+                                                  //
+                                                  //
     if let Some(username) = msg.from().and_then(|user| user.username.clone()) {
         bot.send_message(msg.chat.id, format!("Your username is @{}.", username)).await?;
     } else {
@@ -136,6 +265,9 @@ async fn username_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + 
 }
 
 async fn username_and_age_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+    if !is_authorized_dev(&msg) { return Ok(());} //check is dev
+                                                  //
+                                                  //
     if let Some(requester_username) = msg.from().and_then(|user| user.username.clone()) {
         if requester_username != "juno0x153" {
             bot.send_message(msg.chat.id, "You are not authorized to use this command.").await?;
@@ -149,7 +281,9 @@ async fn username_and_age_command(bot: Bot, msg: Message) -> Result<(), Box<dyn 
 }
 
 async fn write_sql_command(bot: Bot, msg: Message, db_pool: Arc<DbPool>, value: String) -> Result<(), Box<dyn Error + Send + Sync>> {
-    //let value = "Some value"; // Replace this with the actual value you want to write
+    if !is_authorized_dev(&msg) { return Ok(());} //check is dev
+                                                  //
+                                                  //
     match write_to_db(&db_pool, &value).await {
         Ok(_) => {
             if let Err(e) = bot.send_message(msg.chat.id, "Successfully written to database").await {
@@ -166,6 +300,9 @@ async fn write_sql_command(bot: Bot, msg: Message, db_pool: Arc<DbPool>, value: 
 }
 
 async fn read_sql_command(bot: Bot, msg: Message, db_pool: Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
+    if !is_authorized_dev(&msg) { return Ok(());} //check is dev
+                                                  //
+                                                  //
     match read_from_db(&db_pool).await {
         Ok(value) => {
             // Handle the case when reading from the database succeeds
@@ -185,6 +322,12 @@ async fn read_sql_command(bot: Bot, msg: Message, db_pool: Arc<DbPool>) -> Resul
     Ok(())
 }
 
+
+
+//
+//TODO AdminCommands
+//
+//====================================================
 
 fn is_authorized_sender(msg: &Message) -> bool {
     if let Some(true_sender_username) = msg.from().and_then(|user| user.username.as_ref()) {
@@ -248,5 +391,98 @@ async fn list_admins_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error
 }
 
 
+async fn startnewseason_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if !is_authorized_sender(&msg) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+    bot.send_message(msg.chat.id, "A new rock-paper-scissors season has started! Let the games begin.").await?;
+    Ok(())
+}
 
+async fn stopnewseason_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if !is_authorized_sender(&msg) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+    bot.send_message(msg.chat.id, "The current rock-paper-scissors season has been concluded. Stay tuned for results and rewards.").await?;
+    Ok(())
+}
 
+async fn startsignupphase_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if !is_authorized_sender(&msg) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+    bot.send_message(msg.chat.id, "The signup phase for the new rock-paper-scissors season is now open. Interested players can register.").await?; 
+   Ok(())
+}
+
+async fn stopsignupphase_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if !is_authorized_sender(&msg) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+   bot.send_message(msg.chat.id, "The signup phase is now closed. Preparations for the game will now commence.").await?; 
+    Ok(())
+}
+
+async fn startgamingphase_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if !is_authorized_sender(&msg) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+    bot.send_message(msg.chat.id, "The gaming phase has begun! Players, get ready to challenge each other.").await?;
+    Ok(())
+}
+
+async fn stopgamingphase_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if !is_authorized_sender(&msg) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+    bot.send_message(msg.chat.id, "The gaming phase has ended. Thank you to all participants!").await?;
+    Ok(())
+}
+
+async fn approveplayer_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if !is_authorized_sender(&msg) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+    bot.send_message(msg.chat.id, "Player has been successfully approved for participation.").await?;
+    Ok(())
+}
+
+async fn refuseplayer_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if !is_authorized_sender(&msg) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+    bot.send_message(msg.chat.id, "Player's request to participate has been refused.").await?;
+    Ok(())
+}
+
+async fn viewsignuplist_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if !is_authorized_sender(&msg) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+    bot.send_message(msg.chat.id, "Here's the list of players who have signed up: ...").await?;
+    Ok(())
+}
+
+async fn viewapprovedlist_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if !is_authorized_sender(&msg) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+    bot.send_message(msg.chat.id, "Here's the list of approved players: ...").await?;
+    Ok(())
+}
+
+async fn viewrefusedlist_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if !is_authorized_sender(&msg) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+    bot.send_message(msg.chat.id, "Here's the list of players whose requests were refused: ...").await?;
+    Ok(())
+}
+
+async fn viewleaderboard_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if !is_authorized_sender(&msg) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+    bot.send_message(msg.chat.id, "Current leaderboard standings: ...").await?;
+    Ok(())
+}

@@ -1,4 +1,5 @@
-use rusqlite::{Connection, Result};
+//use rusqlite::{Connection, Result};
+use rusqlite::{Result};
 use r2d2_sqlite::SqliteConnectionManager;
 use r2d2::Pool;
 
