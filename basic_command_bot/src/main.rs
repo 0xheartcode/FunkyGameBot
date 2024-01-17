@@ -186,7 +186,20 @@ async fn read_sql_command(bot: Bot, msg: Message, db_pool: Arc<DbPool>) -> Resul
 }
 
 
+fn is_authorized_sender(msg: &Message) -> bool {
+    if let Some(true_sender_username) = msg.from().and_then(|user| user.username.as_ref()) {
+        true_sender_username == "juno0x153" || true_sender_username == "novo2424" || is_admin(true_sender_username)
+    } else {
+        false
+    }
+}
+
+
 async fn add_admin_command(bot: Bot, msg: Message, username: String) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if !is_authorized_sender(&msg) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+
     let username = username.trim();
     if username.is_empty() {
         bot.send_message(msg.chat.id, "Please provide a non-empty username.").await?;
@@ -202,6 +215,10 @@ async fn add_admin_command(bot: Bot, msg: Message, username: String) -> Result<(
 }
 
 async fn remove_admin_command(bot: Bot, msg: Message, username: String) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if !is_authorized_sender(&msg) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+
     let username = username.trim();
     if username.is_empty() || !is_admin(&username) {
         if username.is_empty() {
@@ -217,8 +234,16 @@ async fn remove_admin_command(bot: Bot, msg: Message, username: String) -> Resul
 }
 
 async fn list_admins_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
-    let admins = list_admins();
-    bot.send_message(msg.chat.id, format!("Admins: {:?}", admins)).await?;
+        if !is_authorized_sender(&msg) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+    let admins = list_admins(); // Assuming this returns a Vec<String> or similar
+    let mut response = String::from("Admins:\n");
+    for admin in admins {
+        response.push_str(&format!("@{}\n", admin));
+    }
+
+    bot.send_message(msg.chat.id, response).await?;
     Ok(())
 }
 
