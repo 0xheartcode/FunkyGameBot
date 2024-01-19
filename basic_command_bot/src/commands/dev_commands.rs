@@ -1,10 +1,10 @@
 // dev_commands.rs
 
-use teloxide::{prelude::*, utils::command::BotCommands};
+use teloxide::{prelude::*};
 use std::{error::Error};
-use crate::enums::{Command, AdminCommand, DevCommand};
+
 use crate::admin::{is_authorized_dev};
-use crate::database::{init_db_pool, DbPool, write_to_db, read_from_db};
+use crate::database::{DbPool, write_to_db, read_from_db};
 
 use std::sync::Arc;
 
