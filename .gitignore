@@ -359,7 +359,6 @@ celerybeat-schedule
 *.sage.py
 
 # Environments
-.env
 .venv
 env/
 venv/
@@ -388,7 +387,6 @@ ENV/
 .pnp.js
 
 # misc
-.env.local
 .env.development.local
 .env.test.local
 .env.production.local
