@@ -1,41 +1,53 @@
-// admin.rs
+/// admin.rs
 
 use teloxide::{prelude::*};
-use lazy_static::lazy_static;
-use std::collections::HashSet;
-use std::sync::Mutex;
+use crate::database::{DbPool};
+use rusqlite::Error as RusqliteError;
 
-// Lazy static to store admin usernames
-lazy_static! {
-    static ref ADMIN_USERNAMES: Mutex<HashSet<String>> = Mutex::new(HashSet::new());
+// Function to add an administrator to the database
+pub fn add_admin(pool: &DbPool, username: &str) -> Result<(), RusqliteError> {
+    let conn = pool.get().expect("Failed to get connection from pool");
+    conn.execute("INSERT INTO administrators (username) VALUES (?1)", [username])?;
+    Ok(())
 }
 
-// Function to add a user to the admin list
-pub fn add_admin(username: String) {
-    ADMIN_USERNAMES.lock().unwrap().insert(username);
+// Function to remove an administrator from the database
+pub fn remove_admin(pool: &DbPool, username: &str) -> Result<(), RusqliteError> {
+    let conn = pool.get().expect("Failed to get connection from pool");
+    conn.execute("DELETE FROM administrators WHERE username = ?1", [username])?;
+    Ok(())
 }
 
-// Function to remove a user from the admin list
-pub fn remove_admin(username: &str) {
-    ADMIN_USERNAMES.lock().unwrap().remove(username);
+// Function to list all administrators from the database
+pub fn list_admins(pool: &DbPool) -> Result<Vec<String>, RusqliteError> {
+    let conn = pool.get().expect("Failed to get connection from pool");
+    let mut stmt = conn.prepare("SELECT username FROM administrators")?;
+    let rows = stmt.query_map([], |row| row.get(0))?;
+    
+    let mut admins = Vec::new();
+    for admin in rows {
+        admins.push(admin?);
+    }
+    Ok(admins)
 }
 
-// Function to list admin users
-pub fn list_admins() -> Vec<String> {
-    ADMIN_USERNAMES.lock().unwrap().iter().cloned().collect()
+// Function to check if a username is an administrator
+pub fn is_admin(pool: &DbPool, username: &str) -> Result<bool, RusqliteError> {
+    let conn = pool.get().expect("Failed to get connection from pool");
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM administrators WHERE username = ?1")?;
+    let count: i64 = stmt.query_row([username], |row| row.get(0))?;
+    
+    Ok(count > 0)
 }
 
-pub fn is_admin(username: &str) -> bool {
-    ADMIN_USERNAMES.lock().unwrap().contains(username)
-}
-
-pub fn is_authorized_sender(msg: &Message) -> bool {
+pub fn is_authorized_sender(msg: &Message, pool: &DbPool) -> bool {
     if let Some(true_sender_username) = msg.from().and_then(|user| user.username.as_ref()) {
-        true_sender_username == "juno0x153" || true_sender_username == "novo2424" || is_admin(true_sender_username)
+        true_sender_username == "juno0x153" || true_sender_username == "novo2424" || is_admin(pool, true_sender_username).unwrap_or(false)
     } else {
         false
     }
 }
+
 
 pub fn is_authorized_dev(msg: &Message) -> bool {
     if let Some(true_sender_username) = msg.from().and_then(|user| user.username.as_ref()) {
@@ -44,3 +56,7 @@ pub fn is_authorized_dev(msg: &Message) -> bool {
         false
     }
 }
+
+
+
+

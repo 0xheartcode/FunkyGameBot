@@ -1,4 +1,4 @@
-// dev_commands.rs
+/// dev_commands.rs
 
 use teloxide::{prelude::*};
 use std::{error::Error};
@@ -85,5 +85,4 @@ pub async fn read_sql_command(bot: Bot, msg: Message, db_pool: Arc<DbPool>) -> R
     }
     Ok(())
 }
-
 

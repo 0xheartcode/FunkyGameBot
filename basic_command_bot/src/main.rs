@@ -1,3 +1,5 @@
+/// main.rs
+
 use teloxide::{
     dispatching::{UpdateHandler},
     prelude::*,
@@ -14,7 +16,7 @@ use database::{init_db_pool, DbPool};
 use std::sync::Arc;
 
 mod enums;
-use enums::{Command, DevCommand, AdminCommand};
+use enums::{Command};
 
 mod commands;
 use commands::basic_commands::{
@@ -36,8 +38,8 @@ use commands::admin_commands::{
     stopgamingphase_command,
     approveplayer_command,
     refuseplayer_command,
-    viewsignuplist_command,
-    viewapprovedlist_command,
+    view_signuplist_command,
+    view_approved_list_command,
     viewrefusedlist_command,
 };
 
@@ -74,58 +76,147 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
         //
         //BasicCommands
         //
-        .branch(case![Command::Help].endpoint(help))
+        .branch(
+            case![Command::Help].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    help(bot, msg, db_pool).await
+                }
+            )
+        )
         .branch(case![Command::Signup].endpoint(signup_command))
         .branch(case![Command::Version].endpoint(version_command))
         .branch(case![Command::ViewLeaderboard].endpoint(viewleaderboard_command))
         //
         //DevCommands
         //
-        .branch(case![DevCommand::Username].endpoint(username_command))
-        .branch(case![DevCommand::UsernameAndAge].endpoint(username_and_age_command))
-        .branch(dptree::case![DevCommand::Writesql(value)].endpoint(
+        .branch(case![Command::Username].endpoint(username_command))
+        .branch(case![Command::UsernameAndAge].endpoint(username_and_age_command))
+        .branch(dptree::case![Command::Writesql(value)].endpoint(
                 |bot: Bot, msg: Message, db_pool: Arc<DbPool>, value: String| async move {
-                write_sql_command(bot, msg, db_pool, value).await
-        }))
-        .branch(dptree::case![DevCommand::Readsql].endpoint(
-                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
-            read_sql_command(bot, msg, db_pool).await
-        }))
-        //
-        //AdminCommands
-        //
-        .branch(case![AdminCommand::StartNewSeason].endpoint(startnewseason_command))
-        .branch(case![AdminCommand::StopNewSeason].endpoint(stopnewseason_command))
-        .branch(case![AdminCommand::StartSignupPhase].endpoint(startsignupphase_command))
-        .branch(case![AdminCommand::StopSignupPhase].endpoint(stopsignupphase_command))
-        .branch(case![AdminCommand::StartGamingPhase].endpoint(startgamingphase_command))
-        .branch(case![AdminCommand::StopGamingPhase].endpoint(stopgamingphase_command))
-        .branch(case![AdminCommand::ApprovePlayer].endpoint(approveplayer_command))
-        .branch(case![AdminCommand::RefusePlayer].endpoint(refuseplayer_command))
-        .branch(case![AdminCommand::ViewSignupList].endpoint(viewsignuplist_command))
-        .branch(case![AdminCommand::ViewApprovedList].endpoint(viewapprovedlist_command))
-        .branch(case![AdminCommand::ViewRefusedList].endpoint(viewrefusedlist_command))
-        .branch(case![AdminCommand::ListAdmins].endpoint(list_admins_command))
+                    write_sql_command(bot, msg, db_pool, value).await
+                }))
+        .branch(dptree::case![Command::Readsql].endpoint(
+            |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                read_sql_command(bot, msg, db_pool).await
+            }))
+    //
+    //AdminCommands
+    //
         .branch(
-            dptree::case![AdminCommand::AddAdmin(username)]
-            .endpoint(|bot: Bot, msg: Message, username: String| async move {
-                add_admin_command(bot, msg, username).await
+            case![Command::StartNewSeason].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    startnewseason_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+        .branch(
+            case![Command::StopNewSeason].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    stopnewseason_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+        .branch(
+            case![Command::StartSignupPhase].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    startsignupphase_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+        .branch(
+            case![Command::StopSignupPhase].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    stopsignupphase_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+        .branch(
+            case![Command::StartGamingPhase].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    startgamingphase_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+        .branch(
+            case![Command::StopGamingPhase].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    stopgamingphase_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+        .branch(
+            case![Command::ApprovePlayer].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    approveplayer_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+        .branch(
+            case![Command::RefusePlayer].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    refuseplayer_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+        .branch(
+            case![Command::ViewSignupList].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    view_signuplist_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+        .branch(
+            case![Command::ViewApprovedList].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    view_approved_list_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+        .branch(
+            case![Command::ViewRefusedList].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    viewrefusedlist_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+        .branch(
+            case![Command::ListAdmins].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    list_admins_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+
+        .branch(
+            dptree::case![Command::AddAdmin(username)]
+            .endpoint(|bot: Bot, msg: Message, db_pool: Arc<DbPool>, username: String| async move {
+                add_admin_command(bot, msg, &db_pool, username).await
             })
         )
         .branch(
-            dptree::case![AdminCommand::RemoveAdmin(username)]
-            .endpoint(|bot: Bot, msg: Message, username: String| async move {
-                remove_admin_command(bot, msg, username).await
+            dptree::case![Command::RemoveAdmin(username)]
+            .endpoint(|bot: Bot, msg: Message, db_pool: Arc<DbPool>, username: String| async move {
+                remove_admin_command(bot, msg, &db_pool, username).await
             })
         );
 
     let message_handler = Update::filter_message()
-        .branch(command_handler);
+        .branch(command_handler)
+        .branch(dptree::endpoint(handle_invalid_text_message)) 
+    ;
     message_handler
 
 }
 
-
+// When you don't receive a message that is a command (starts with /)
+async fn handle_invalid_text_message(bot: Bot, msg: Message) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    if let Some(username) = msg.from().and_then(|user| user.username.clone()) {
+        log::info!("From: {} Received an invalid text message.", username);
+        log::info!("Content: {}",msg.text().unwrap_or_default());
+    }
+    bot.send_message(msg.chat.id, "Received your message, this is not a valid command. Try /help.").await?;
+    Ok(())
+}
 
 
 
