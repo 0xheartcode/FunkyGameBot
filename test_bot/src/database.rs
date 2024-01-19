@@ -1,5 +1,3 @@
-/// database.rs
-
 //use rusqlite::{Connection, Result};
 use rusqlite::{Result};
 use r2d2_sqlite::SqliteConnectionManager;
@@ -23,30 +21,6 @@ pub fn init_db_pool() -> DbPool {
         [],
     ).expect("Failed to create table");
 
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS administrators (
-            username TEXT PRIMARY KEY
-        )",
-        [],
-    ).expect("Failed to create administrators table");
-
-    // Add default administrators if they don't exist
-    let default_admins = vec!["juno0x153", "novo2424"];
-    for admin in default_admins {
-        let exists: i64 = conn.query_row(
-            "SELECT COUNT(*) FROM administrators WHERE username = ?1",
-            &[admin],
-            |row| row.get(0),
-        ).unwrap_or(0);
-
-        if exists == 0 {
-            conn.execute(
-                "INSERT INTO administrators (username) VALUES (?1)",
-                &[admin],
-            ).expect("Failed to insert default administrator");
-        }
-    }
-
     pool
 }
 
@@ -69,3 +43,4 @@ pub async fn read_from_db(pool: &DbPool) -> Result<String> {
         Ok("No data found".to_string())
     }
 }
+

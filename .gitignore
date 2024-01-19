@@ -388,7 +388,6 @@ ENV/
 .pnp.js
 
 # misc
-.env.local
 .env.development.local
 .env.test.local
 .env.production.local
