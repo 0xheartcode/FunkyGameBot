@@ -34,4 +34,26 @@ pub async fn version_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error
     Ok(())
 }
 
+// TODO you have joined a game, you need to join the game with a hand
+pub async fn join_game_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+    bot.send_message(msg.chat.id, "You have joined the game. Or are trying to, this command is being built.").await?;
+    Ok(())
+}
 
+// TODO you have created a game, you need to create the game with a hand
+pub async fn create_game_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+    bot.send_message(msg.chat.id, "You have created a game. Command being built.").await?;
+    Ok(())
+}
+
+// TODO
+pub async fn viewleaderboard_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+    bot.send_message(msg.chat.id, "Current leaderboard standings: ...").await?;
+    Ok(())
+}
+
+// TODO
+pub async fn viewleaderboard_specificseason_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+    bot.send_message(msg.chat.id, "The leaderboard standings for a specific game: ...").await?;
+    Ok(())
+}

@@ -2,25 +2,26 @@ use teloxide::{
     dispatching::{UpdateHandler},
     prelude::*,
 };
-use std::{error::Error};
+
 //use dotenv::dotenv;
 
 use chrono::{Local, DateTime};
 mod admin;
-use admin::{add_admin, remove_admin, list_admins, is_admin};
+
 
 mod database;
 use database::{init_db_pool, DbPool};
 use std::sync::Arc;
 
 mod enums;
-use enums::{Command};
+use enums::{Command, DevCommand, AdminCommand};
 
 mod commands;
 use commands::basic_commands::{
     help, 
     signup_command, 
-    version_command
+    version_command,
+    viewleaderboard_command,
 };
 
 use commands::admin_commands::{
@@ -38,7 +39,6 @@ use commands::admin_commands::{
     viewsignuplist_command,
     viewapprovedlist_command,
     viewrefusedlist_command,
-    viewleaderboard_command,
 };
 
 use commands::dev_commands::{
@@ -48,7 +48,7 @@ use commands::dev_commands::{
     read_sql_command
 };
 
-use crate::admin::{is_authorized_sender};
+
 
 #[tokio::main]
 async fn main() {
@@ -77,43 +77,43 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
         .branch(case![Command::Help].endpoint(help))
         .branch(case![Command::Signup].endpoint(signup_command))
         .branch(case![Command::Version].endpoint(version_command))
+        .branch(case![Command::ViewLeaderboard].endpoint(viewleaderboard_command))
         //
         //DevCommands
         //
-        .branch(case![Command::Username].endpoint(username_command))
-        .branch(case![Command::UsernameAndAge].endpoint(username_and_age_command))
-        .branch(dptree::case![Command::Writesql(value)].endpoint(
+        .branch(case![DevCommand::Username].endpoint(username_command))
+        .branch(case![DevCommand::UsernameAndAge].endpoint(username_and_age_command))
+        .branch(dptree::case![DevCommand::Writesql(value)].endpoint(
                 |bot: Bot, msg: Message, db_pool: Arc<DbPool>, value: String| async move {
                 write_sql_command(bot, msg, db_pool, value).await
         }))
-        .branch(dptree::case![Command::Readsql].endpoint(
+        .branch(dptree::case![DevCommand::Readsql].endpoint(
                 |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
             read_sql_command(bot, msg, db_pool).await
         }))
         //
         //AdminCommands
         //
-        .branch(case![Command::StartNewSeason].endpoint(startnewseason_command))
-        .branch(case![Command::StopNewSeason].endpoint(stopnewseason_command))
-        .branch(case![Command::StartSignupPhase].endpoint(startsignupphase_command))
-        .branch(case![Command::StopSignupPhase].endpoint(stopsignupphase_command))
-        .branch(case![Command::StartGamingPhase].endpoint(startgamingphase_command))
-        .branch(case![Command::StopGamingPhase].endpoint(stopgamingphase_command))
-        .branch(case![Command::ApprovePlayer].endpoint(approveplayer_command))
-        .branch(case![Command::RefusePlayer].endpoint(refuseplayer_command))
-        .branch(case![Command::ViewSignupList].endpoint(viewsignuplist_command))
-        .branch(case![Command::ViewApprovedList].endpoint(viewapprovedlist_command))
-        .branch(case![Command::ViewRefusedList].endpoint(viewrefusedlist_command))
-        .branch(case![Command::ViewLeaderboard].endpoint(viewleaderboard_command))
-        .branch(case![Command::ListAdmins].endpoint(list_admins_command))
+        .branch(case![AdminCommand::StartNewSeason].endpoint(startnewseason_command))
+        .branch(case![AdminCommand::StopNewSeason].endpoint(stopnewseason_command))
+        .branch(case![AdminCommand::StartSignupPhase].endpoint(startsignupphase_command))
+        .branch(case![AdminCommand::StopSignupPhase].endpoint(stopsignupphase_command))
+        .branch(case![AdminCommand::StartGamingPhase].endpoint(startgamingphase_command))
+        .branch(case![AdminCommand::StopGamingPhase].endpoint(stopgamingphase_command))
+        .branch(case![AdminCommand::ApprovePlayer].endpoint(approveplayer_command))
+        .branch(case![AdminCommand::RefusePlayer].endpoint(refuseplayer_command))
+        .branch(case![AdminCommand::ViewSignupList].endpoint(viewsignuplist_command))
+        .branch(case![AdminCommand::ViewApprovedList].endpoint(viewapprovedlist_command))
+        .branch(case![AdminCommand::ViewRefusedList].endpoint(viewrefusedlist_command))
+        .branch(case![AdminCommand::ListAdmins].endpoint(list_admins_command))
         .branch(
-            dptree::case![Command::AddAdmin(username)]
+            dptree::case![AdminCommand::AddAdmin(username)]
             .endpoint(|bot: Bot, msg: Message, username: String| async move {
                 add_admin_command(bot, msg, username).await
             })
         )
         .branch(
-            dptree::case![Command::RemoveAdmin(username)]
+            dptree::case![AdminCommand::RemoveAdmin(username)]
             .endpoint(|bot: Bot, msg: Message, username: String| async move {
                 remove_admin_command(bot, msg, username).await
             })

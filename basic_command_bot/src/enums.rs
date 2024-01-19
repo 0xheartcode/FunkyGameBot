@@ -14,52 +14,7 @@ pub enum Command {
     Signup,
     #[command(description = "Get the current version.")]
     Version,
-    //
-    //DevCommands
-    //
-    #[command(description = "off")]
-    Username,
-    #[command(description = "off")]
-    UsernameAndAge,
-    #[command(description = "off")]
-    Writesql(String),
-    #[command(description = "off")]
-    Readsql,
-    //
-    //AdminCommands
-    //
-    //#[command(description = "add a user to the admin list.")]
-    #[command(description = "off")]
-    AddAdmin(String),
-    //#[command(description = "remove a user from the admin list.")]
-    #[command(description = "off")]
-    RemoveAdmin(String),
-    //#[command(description = "list admin users.")]
-    #[command(description = "off")]
-    ListAdmins,
-    #[command(description = "off")]
-    StartNewSeason,
-    #[command(description = "off")]
-    StopNewSeason,
-    #[command(description = "off")]
-    StartSignupPhase,
-    #[command(description = "off")]
-    StopSignupPhase,
-    #[command(description = "off")]
-    StartGamingPhase,
-    #[command(description = "off")]
-    StopGamingPhase,
-    #[command(description = "off")]
-    ApprovePlayer,
-    #[command(description = "off")]
-    RefusePlayer,
-    #[command(description = "off")]
-    ViewSignupList,
-    #[command(description = "off")]
-    ViewApprovedList,
-    #[command(description = "off")]
-    ViewRefusedList,
-    #[command(description = "off")]
+    #[command(description = "View the current leaderboard.")]
     ViewLeaderboard,
 }
 
@@ -103,8 +58,6 @@ pub enum AdminCommand {
 
         ")]
     RefusePlayer,
-    #[command(description = "View the current leaderboard.")]
-    ViewLeaderboard,
 }
 
 #[derive(BotCommands, Clone)]

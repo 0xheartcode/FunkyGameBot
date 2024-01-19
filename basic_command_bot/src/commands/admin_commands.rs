@@ -1,8 +1,8 @@
 // admin_commands.rs
 
-use teloxide::{prelude::*, utils::command::BotCommands};
+use teloxide::{prelude::*};
 use std::{error::Error};
-use crate::enums::{Command, AdminCommand, DevCommand};
+
 use crate::admin::{is_authorized_sender, list_admins, is_admin, remove_admin, add_admin};
 
 //
@@ -152,10 +152,34 @@ pub async fn viewrefusedlist_command(bot: Bot, msg: Message) -> Result<(), Box<d
     Ok(())
 }
 
-pub async fn viewleaderboard_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+pub async fn setbroadcastchannel_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
         if !is_authorized_sender(&msg) {
         return Ok(());  // Early return if the sender is not authorized
     }
     bot.send_message(msg.chat.id, "Current leaderboard standings: ...").await?;
+    Ok(())
+}
+
+pub async fn setgroup_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if !is_authorized_sender(&msg) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+    bot.send_message(msg.chat.id, "Current leaderboard standings: ...").await?;
+    Ok(())
+}
+
+pub async fn msgbroadcastchannel_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if !is_authorized_sender(&msg) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+    bot.send_message(msg.chat.id, "Send a message to the broadcast channel").await?;
+    Ok(())
+}
+
+pub async fn msggroup_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if !is_authorized_sender(&msg) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+    bot.send_message(msg.chat.id, "Send a message to the group channel").await?;
     Ok(())
 }
