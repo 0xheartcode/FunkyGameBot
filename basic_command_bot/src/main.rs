@@ -2,7 +2,6 @@ use teloxide::{
     dispatching::{UpdateHandler},
     //dispatching::{dialogue, dialogue::InMemStorage, UpdateHandler},
     prelude::*,
-    utils::command::BotCommands,
 };
 use std::{error::Error};
 //use dotenv::dotenv;
@@ -14,8 +13,17 @@ mod admin;
 use admin::{add_admin, remove_admin, list_admins, is_admin};
 
 mod database;
-use database::{init_db_pool, DbPool, write_to_db, read_from_db};
+use database::{init_db_pool, DbPool};
 use std::sync::Arc;
+
+mod enums;
+use enums::{Command, AdminCommand, DevCommand};
+
+mod commands;
+use commands::basic_commands::{help, signup_command, version_command};
+use commands::dev_commands::{username_command, username_and_age_command, write_sql_command, read_sql_command,  };
+
+use crate::admin::{is_authorized_sender};
 
 #[tokio::main]
 async fn main() {
@@ -94,234 +102,6 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
 
 
 
-#[derive(BotCommands, Clone)]
-#[command(rename_rule = "lowercase", description = "These commands are supported:")]
-enum Command {
-    //
-    //BasicCommands
-    //
-    #[command(description = "Display this text.")]
-    Help,
-    #[command(description = "Register for a new game season.")]
-    Signup,
-    #[command(description = "Get the current version.")]
-    Version,
-    //
-    //DevCommands
-    //
-    #[command(description = "off")]
-    Username,
-    #[command(description = "off")]
-    UsernameAndAge,
-    #[command(description = "off")]
-    Writesql(String),
-    #[command(description = "off")]
-    Readsql,
-    //
-    //AdminCommands
-    //
-    //#[command(description = "add a user to the admin list.")]
-    #[command(description = "off")]
-    AddAdmin(String),
-    //#[command(description = "remove a user from the admin list.")]
-    #[command(description = "off")]
-    RemoveAdmin(String),
-    //#[command(description = "list admin users.")]
-    #[command(description = "off")]
-    ListAdmins,
-    #[command(description = "off")]
-    StartNewSeason,
-    #[command(description = "off")]
-    StopNewSeason,
-    #[command(description = "off")]
-    StartSignupPhase,
-    #[command(description = "off")]
-    StopSignupPhase,
-    #[command(description = "off")]
-    StartGamingPhase,
-    #[command(description = "off")]
-    StopGamingPhase,
-    #[command(description = "off")]
-    ApprovePlayer,
-    #[command(description = "off")]
-    RefusePlayer,
-    #[command(description = "off")]
-    ViewSignupList,
-    #[command(description = "off")]
-    ViewApprovedList,
-    #[command(description = "off")]
-    ViewRefusedList,
-    #[command(description = "off")]
-    ViewLeaderboard,
-}
-
-#[derive(BotCommands, Clone)]
-#[command(rename_rule = "lowercase", description = "These 🌟 Admin 🌟 commands are supported:")]
-enum AdminCommand {
-    #[command(description = "add a user to the admin list.")]
-    AddAdmin(String),
-    #[command(description = "remove a user from the admin list.")]
-    RemoveAdmin(String),
-    #[command(description = "list admin users.
-
-        ")]
-    ListAdmins,
-    #[command(description = "Start a new season for the rock-paper-scissors game.")]
-    StartNewSeason,
-    #[command(description = "Stop the current season of the rock-paper-scissors game.")]
-    StopNewSeason,
-    #[command(description = "Begin the signup phase for players.")]
-    StartSignupPhase,
-    #[command(description = "End the signup phase for players.")]
-    StopSignupPhase,
-    #[command(description = "Start the gaming phase.")]
-    StartGamingPhase,
-
-    #[command(description = "Stop the gaming phase.
-
-        ")]
-    StopGamingPhase,
-    #[command(description = "View the list of players who signed up.")]
-    ViewSignupList,
-    #[command(description = "View the list of approved players.")]
-    ViewApprovedList,
-    #[command(description = "View the list of refused players.
-
-        ")]
-    ViewRefusedList,
-    #[command(description = "Approve a player's signup request.")]
-    ApprovePlayer,
-    #[command(description = "Refuse a player's signup request.
-
-        ")]
-    RefusePlayer,
-    #[command(description = "View the current leaderboard.")]
-    ViewLeaderboard,
-}
-
-#[derive(BotCommands, Clone)]
-#[command(rename_rule = "lowercase", description = "These 🤖 Dev 🤖 commands are supported:")]
-enum DevCommand {
-    #[command(description = "displays a username.")]
-    Username,
-    #[command(description = "basic auth test.")]
-    UsernameAndAge,
-    #[command(description = "Write to sqllite db.")]
-    Writesql(String),
-    #[command(description = "Read from sqllite db.")]
-    Readsql,
-}
-//
-//
-//TODO BasicCommands
-//
-//====================================================
-
-async fn help(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
-    if is_authorized_dev(&msg) {
-        bot.send_message(msg.chat.id, DevCommand::descriptions().to_string()).await?;
-    }
-    if is_authorized_sender(&msg) {
-        bot.send_message(msg.chat.id, AdminCommand::descriptions().to_string()).await?;
-    }
-    bot.send_message(msg.chat.id, Command::descriptions().to_string()).await?;
-    Ok(())
-}
-
-// TODO implement function
-async fn signup_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
-    bot.send_message(msg.chat.id, "You may want to sign up to a game. Bot is being built.").await?;
-    Ok(())
-}
-
-// TODO enable checking the Cargo.toml file for version.
-async fn version_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
-    bot.send_message(msg.chat.id, "The current version of the bot is v0.0.1.").await?;
-    Ok(())
-}
-//
-//TODO DevCommands
-//
-//====================================================
-fn is_authorized_dev(msg: &Message) -> bool {
-    if let Some(true_sender_username) = msg.from().and_then(|user| user.username.as_ref()) {
-        true_sender_username == "juno0x153" 
-    } else {
-        false
-    }
-}
-
-
-async fn username_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
-    if !is_authorized_dev(&msg) { return Ok(());} //check is dev
-                                                  //
-                                                  //
-    if let Some(username) = msg.from().and_then(|user| user.username.clone()) {
-        bot.send_message(msg.chat.id, format!("Your username is @{}.", username)).await?;
-    } else {
-        bot.send_message(msg.chat.id, "Unable to retrieve your username.").await?;
-    }
-    Ok(())
-}
-
-async fn username_and_age_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
-    if !is_authorized_dev(&msg) { return Ok(());} //check is dev
-                                                  //
-                                                  //
-    if let Some(requester_username) = msg.from().and_then(|user| user.username.clone()) {
-        if requester_username != "juno0x153" {
-            bot.send_message(msg.chat.id, "You are not authorized to use this command.").await?;
-        } else {
-            bot.send_message(msg.chat.id, "Your username is valid.").await?;
-        }
-    } else {
-        bot.send_message(msg.chat.id, "Unable to retrieve your username.").await?;
-    }
-    Ok(())
-}
-
-async fn write_sql_command(bot: Bot, msg: Message, db_pool: Arc<DbPool>, value: String) -> Result<(), Box<dyn Error + Send + Sync>> {
-    if !is_authorized_dev(&msg) { return Ok(());} //check is dev
-                                                  //
-                                                  //
-    match write_to_db(&db_pool, &value).await {
-        Ok(_) => {
-            if let Err(e) = bot.send_message(msg.chat.id, "Successfully written to database").await {
-                log::error!("Failed to send message: {}", e);
-            }
-        },
-        Err(e) => {
-            if let Err(e) = bot.send_message(msg.chat.id, format!("Error writing to database: {}", e)).await {
-                log::error!("Failed to send message: {}", e);
-            }
-        },
-    }
-    Ok(())
-}
-
-async fn read_sql_command(bot: Bot, msg: Message, db_pool: Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
-    if !is_authorized_dev(&msg) { return Ok(());} //check is dev
-                                                  //
-                                                  //
-    match read_from_db(&db_pool).await {
-        Ok(value) => {
-            // Handle the case when reading from the database succeeds
-            if let Err(e) = bot.send_message(msg.chat.id, format!("Latest value from database: {}", value)).await {
-                // Log the error if sending the message fails
-                log::error!("Failed to send message: {}", e);
-            }
-        },
-        Err(e) => {
-            // Handle the case when reading from the database fails
-            if let Err(e) = bot.send_message(msg.chat.id, format!("Error reading from database: {}", e)).await {
-                // Log the error if sending the message fails
-                log::error!("Failed to send message: {}", e);
-            }
-        },
-    }
-    Ok(())
-}
-
 
 
 //
@@ -329,13 +109,7 @@ async fn read_sql_command(bot: Bot, msg: Message, db_pool: Arc<DbPool>) -> Resul
 //
 //====================================================
 
-fn is_authorized_sender(msg: &Message) -> bool {
-    if let Some(true_sender_username) = msg.from().and_then(|user| user.username.as_ref()) {
-        true_sender_username == "juno0x153" || true_sender_username == "novo2424" || is_admin(true_sender_username)
-    } else {
-        false
-    }
-}
+
 
 
 async fn add_admin_command(bot: Bot, msg: Message, username: String) -> Result<(), Box<dyn Error + Send + Sync>> {
