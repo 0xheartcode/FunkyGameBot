@@ -146,8 +146,33 @@ pub async fn stop_new_season_command(bot: Bot, msg: Message, db_pool: &Arc<DbPoo
         if !is_authorized_sender(&msg, db_pool) {
         return Ok(());  // Early return if the sender is not authorized
     }
-    bot.send_message(msg.chat.id, "The current rock-paper-scissors season has been concluded. Stay tuned for results and rewards.").await?;
+    // Check if there is an active season
+    match current_active_season_details(db_pool).await {
+        Ok(Some((season_name, _, _))) => {
+            // Stop the active season
+            match stop_current_season(db_pool).await {
+                Ok(_) => {
+                    // Successfully stopped the season
+                    bot.send_message(msg.chat.id, format!("The season '{}' has been successfully concluded.", season_name)).await?;
+                }
+                Err(e) => {
+                    // Error in stopping the season
+                    bot.send_message(msg.chat.id, format!("Failed to conclude the season '{}': {}", season_name, e)).await?;
+                }
+            }
+        }
+        Ok(None) => {
+            // No active season
+            bot.send_message(msg.chat.id, "There is no active season to conclude.").await?;
+        }
+        Err(e) => {
+            // Error in getting season details
+            bot.send_message(msg.chat.id, format!("Failed to get details of the current season: {}", e)).await?;
+        }
+    }
+
     Ok(())
+
 }
 
 

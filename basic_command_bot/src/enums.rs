@@ -8,11 +8,11 @@ pub enum Command {
     //
     //BasicCommands
     //
-    #[command(description = "Display this text.")]
+    #[command(description = "Display this text. 🟢")]
     Help,
     #[command(description = "Register for a new game season.")]
     Signup,
-    #[command(description = "Get the current version.")]
+    #[command(description = "Get the current version. 🟢")]
     Version,
     //
     //DevCommands
@@ -86,27 +86,27 @@ pub enum Command {
 #[derive(BotCommands, Clone)]
 #[command(rename_rule = "lowercase", description = "These 🌟 Admin 🌟 commands are supported:")]
 pub enum AdminCommand {
-    #[command(description = "add a user to the admin list.")]
+    #[command(description = "add a user to the admin list. 🟢")]
     AddAdmin(String),
-    #[command(description = "remove a user from the admin list.")]
+    #[command(description = "remove a user from the admin list. 🟢")]
     RemoveAdmin(String),
-    #[command(description = "list admin users.
+    #[command(description = "list admin users. 🟢 
 
         ")]
     ListAdmins,
-    #[command(description = "Start a new season for the rock-paper-scissors game with a given name and max number of players.")]
+    #[command(description = "Start a new season for the rock-paper-scissors game with a given name and max number of players. 🟢 ")]
     StartNewSeason(String),
-    #[command(description = "Stop the current season of the rock-paper-scissors game.")]
+    #[command(description = "Stop the current season of the rock-paper-scissors game. 🟢")]
     StopNewSeason,
-    #[command(description = "Information regarding the current season.
+    #[command(description = "Information regarding the current season. 🟢 
 
         ")]
     CurrentSeasonStatus,
-    #[command(description = "Begin the signup phase for players.")]
+    #[command(description = "Begin the signup phase for players. 🟠")]
     StartSignupPhase,
-    #[command(description = "End the signup phase for players.")]
+    #[command(description = "End the signup phase for players. 🟠")]
     StopSignupPhase,
-    #[command(description = "Start the gaming phase.")]
+    #[command(description = "Start the gaming phase. 🟠")]
     StartGamingPhase,
 
     #[command(description = "Stop the gaming phase.
@@ -134,19 +134,19 @@ pub enum AdminCommand {
 
         ")]
     RefusePlayer,
-    #[command(description = "Set the channel ID for broadcasting messages.")]
+    #[command(description = "Set the channel ID for broadcasting messages. 🟠")]
     SetBroadcastChannel,
-    #[command(description = "Set the group channel ID for group-related messages.")]
+    #[command(description = "Set the group channel ID for group-related messages. 🟠")]
     SetGroupChannel,
-    #[command(description = "Send a message to the broadcast channel.")]
+    #[command(description = "Send a message to the broadcast channel. 🟠")]
     MsgBroadcastChannel,
-    #[command(description = "Send a message to the group channel.")]
+    #[command(description = "Send a message to the group channel. 🟠")]
     MsgGroup,
-    #[command(description = "Retrieve the current ID of the group and broadcast channel.")]
+    #[command(description = "Retrieve the current ID of the group and broadcast channel. 🟠")]
     GetGroupBroadcastId,
-    #[command(description = "Reset the group and broadcast channel settings.")]
+    #[command(description = "Reset the group and broadcast channel settings.  🟠")]
     ResetGroupBroadcast,
-    #[command(description = "Read the changelog.")]
+    #[command(description = "Read the changelog. 🟢")]
     ReadChangelog,
 }
 

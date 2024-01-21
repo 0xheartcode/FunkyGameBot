@@ -2,11 +2,11 @@
 
 ## Command Structuring and Parsing:
 
-- Implemented parsing of complex command inputs (e.g., `/startnewseason SeasonName 100`).
+- Implemented parsing of complex command inputs (e.g., `/command String Int`). Better to pipe to String and then let the command handle it directly.
 
 ## Database Enhancements:
 
-- Added functions to check for an active season, start a new season, and stop the current season.
+- Added functions to check for an active season, season details, start a new season, and stop the current season.
 
 ## Error Handling Improvements:
 
