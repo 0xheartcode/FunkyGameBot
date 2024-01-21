@@ -13,10 +13,10 @@
 - [X] No Docker, Rust + SQLlite inconvenient at the moment.
 
 - [ ] Basic Bot with Rust and SQLlite in CI/CD
-- [ ] CI/CD connected to my remote cloud server. InProgress
+- [X] CI/CD connected to my remote cloud server. InProgress
 ---
 - Implement the game logic, step by step.
-- Monday
+- Tuesday
 
 
 ---
@@ -74,3 +74,28 @@ Step 3: Reuse for Other Functions
 You can now easily use run_blocking_db_operation for other similar operations in your code. For example, if you have another function that performs a database write operation, you can use this utility function in a similar way.
 
 This approach centralizes the handling of async and sync interoperation, reducing code duplication and simplifying the integration of synchronous database operations in an async context.
+
+
+### Value args matching does not work correctly, because of the catch all command.
+Need to create a simpler command, with only a String to catch all the wrong inputs..
+```
+ 
+    // Extract and validate the season name and max players
+    let season_name = season_name.trim();
+    let max_players = max_players;
+
+    if season_name.is_empty() {
+        bot.send_message(msg.chat.id, "Please provide a non-empty season name.").await?;
+        return Ok(());
+    }
+    if season_name.split_whitespace().count() > 1 {
+        bot.send_message(msg.chat.id, "The season name should not contain spaces.").await?;
+        return Ok(());
+    }
+    if max_players <= 0 {
+        bot.send_message(msg.chat.id, "Please provide a valid number of maximum players (greater than 0).").await?;
+        return Ok(());
+    }
+
+
+```

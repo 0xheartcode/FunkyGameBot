@@ -47,6 +47,18 @@ pub fn init_db_pool() -> DbPool {
         }
     }
 
+    conn.execute(
+    "CREATE TABLE IF NOT EXISTS seasons (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL,
+        is_active BOOLEAN NOT NULL,
+        max_players INTEGER NOT NULL,
+        start_date TEXT,
+        stop_date TEXT
+        )",
+        [],
+    ).expect("Failed to create modified seasons table");
+
     pool
 }
 

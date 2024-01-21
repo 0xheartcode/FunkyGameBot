@@ -30,17 +30,26 @@ use commands::admin_commands::{
     add_admin_command,
     remove_admin_command,
     list_admins_command,
-    startnewseason_command,
-    stopnewseason_command,
+    start_new_season_command,
+    stop_new_season_command,
+    current_season_status_command,
     startsignupphase_command,
     stopsignupphase_command,
     startgamingphase_command,
     stopgamingphase_command,
+    start_round_command,
+    stop_round_command,
     approveplayer_command,
     refuseplayer_command,
     view_signuplist_command,
     view_approved_list_command,
     viewrefusedlist_command,
+    set_broadcastchannel_command,
+    set_group_command,
+    msg_broadcastchannel_command,
+    msg_group_command,
+    get_group_broadcast_id_command,
+    reset_group_broadcast_command
 };
 
 use commands::dev_commands::{
@@ -50,7 +59,9 @@ use commands::dev_commands::{
     read_sql_command
 };
 
-
+use commands::changelogread::{
+    send_changelog,
+};
 
 #[tokio::main]
 async fn main() {
@@ -95,24 +106,31 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
                 |bot: Bot, msg: Message, db_pool: Arc<DbPool>, value: String| async move {
                     write_sql_command(bot, msg, db_pool, value).await
                 }))
-        .branch(dptree::case![Command::Readsql].endpoint(
+    .branch(dptree::case![Command::Readsql].endpoint(
             |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
                 read_sql_command(bot, msg, db_pool).await
             }))
     //
     //AdminCommands
     //
+    .branch(
+        case![Command::StartNewSeason(season_info)].endpoint(
+            |bot: Bot, msg: Message, db_pool: Arc<DbPool>, season_info: String| async move {
+                start_new_season_command(bot, msg, &db_pool, season_info).await
+            }
+        )
+    )
         .branch(
-            case![Command::StartNewSeason].endpoint(
+            case![Command::StopNewSeason].endpoint(
                 |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
-                    startnewseason_command(bot, msg, &db_pool).await
+                    stop_new_season_command(bot, msg, &db_pool).await
                 }
             )
         )
         .branch(
-            case![Command::StopNewSeason].endpoint(
+            case![Command::CurrentSeasonStatus].endpoint(
                 |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
-                    stopnewseason_command(bot, msg, &db_pool).await
+                    current_season_status_command(bot, msg, &db_pool).await
                 }
             )
         )
@@ -141,6 +159,20 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
             case![Command::StopGamingPhase].endpoint(
                 |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
                     stopgamingphase_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+        .branch(
+            case![Command::StartRound].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    start_round_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+        .branch(
+            case![Command::StopRound].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    stop_round_command(bot, msg, &db_pool).await
                 }
             )
         )
@@ -180,6 +212,55 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
             )
         )
         .branch(
+            case![Command::SetBroadcastChannel].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    set_broadcastchannel_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+        .branch(
+            case![Command::SetGroupChannel].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    set_group_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+        .branch(
+            case![Command::MsgBroadcastChannel].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    msg_broadcastchannel_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+        .branch(
+            case![Command::MsgGroup].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    msg_group_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+        .branch(
+            case![Command::GetGroupBroadcastId].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    get_group_broadcast_id_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+        .branch(
+            case![Command::ResetGroupBroadcast].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    reset_group_broadcast_command(bot, msg, &db_pool).await
+                }
+            )
+        )
+        .branch(
+            case![Command::ReadChangelog].endpoint(
+                |bot: Bot, msg: Message| async move {
+                    send_changelog(bot, msg).await
+                }
+            )
+        )
+        .branch(
             case![Command::ListAdmins].endpoint(
                 |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
                     list_admins_command(bot, msg, &db_pool).await
@@ -203,7 +284,7 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
     let message_handler = Update::filter_message()
         .branch(command_handler)
         .branch(dptree::endpoint(handle_invalid_text_message)) 
-    ;
+        ;
     message_handler
 
 }

@@ -153,6 +153,9 @@ Thumbs.db
 ehthumbs.db
 ehthumbs_vista.db
 
+#SQLlite database
+my_database.db
+
 # Dump file
 *.stackdump
 

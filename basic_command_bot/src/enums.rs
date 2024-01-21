@@ -38,9 +38,11 @@ pub enum Command {
     #[command(description = "off")]
     ListAdmins,
     #[command(description = "off")]
-    StartNewSeason,
+    StartNewSeason(String),
     #[command(description = "off")]
     StopNewSeason,
+    #[command(description = "off")]
+    CurrentSeasonStatus,
     #[command(description = "off")]
     StartSignupPhase,
     #[command(description = "off")]
@@ -49,6 +51,10 @@ pub enum Command {
     StartGamingPhase,
     #[command(description = "off")]
     StopGamingPhase,
+    #[command(description = "off")]
+    StartRound,
+    #[command(description = "off")]
+    StopRound,    
     #[command(description = "off")]
     ApprovePlayer,
     #[command(description = "off")]
@@ -59,8 +65,22 @@ pub enum Command {
     ViewApprovedList,
     #[command(description = "off")]
     ViewRefusedList,
-    #[command(description = "off")]
+    #[command(description = "View the current leaderboard.")]
     ViewLeaderboard,
+    #[command(description = "off")]
+    SetBroadcastChannel,
+    #[command(description = "off")]
+    SetGroupChannel,
+    #[command(description = "off")]
+    MsgBroadcastChannel,
+    #[command(description = "off")]
+    MsgGroup,
+    #[command(description = "off")]
+    GetGroupBroadcastId,
+    #[command(description = "off")]
+    ResetGroupBroadcast,
+    #[command(description = "off")]
+    ReadChangelog,
 }
 
 #[derive(BotCommands, Clone)]
@@ -74,10 +94,14 @@ pub enum AdminCommand {
 
         ")]
     ListAdmins,
-    #[command(description = "Start a new season for the rock-paper-scissors game.")]
-    StartNewSeason,
+    #[command(description = "Start a new season for the rock-paper-scissors game with a given name and max number of players.")]
+    StartNewSeason(String),
     #[command(description = "Stop the current season of the rock-paper-scissors game.")]
     StopNewSeason,
+    #[command(description = "Information regarding the current season.
+
+        ")]
+    CurrentSeasonStatus,
     #[command(description = "Begin the signup phase for players.")]
     StartSignupPhase,
     #[command(description = "End the signup phase for players.")]
@@ -89,6 +113,13 @@ pub enum AdminCommand {
 
         ")]
     StopGamingPhase,
+    #[command(description = "The core of the game, start a round.")]
+    StartRound,
+
+    #[command(description = "Stop a game round.
+
+        ")]
+    StopRound,    
     #[command(description = "View the list of players who signed up.")]
     ViewSignupList,
     #[command(description = "View the list of approved players.")]
@@ -103,8 +134,20 @@ pub enum AdminCommand {
 
         ")]
     RefusePlayer,
-    #[command(description = "View the current leaderboard.")]
-    ViewLeaderboard,
+    #[command(description = "Set the channel ID for broadcasting messages.")]
+    SetBroadcastChannel,
+    #[command(description = "Set the group channel ID for group-related messages.")]
+    SetGroupChannel,
+    #[command(description = "Send a message to the broadcast channel.")]
+    MsgBroadcastChannel,
+    #[command(description = "Send a message to the group channel.")]
+    MsgGroup,
+    #[command(description = "Retrieve the current ID of the group and broadcast channel.")]
+    GetGroupBroadcastId,
+    #[command(description = "Reset the group and broadcast channel settings.")]
+    ResetGroupBroadcast,
+    #[command(description = "Read the changelog.")]
+    ReadChangelog,
 }
 
 #[derive(BotCommands, Clone)]
