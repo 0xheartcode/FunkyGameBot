@@ -99,3 +99,7 @@ Need to create a simpler command, with only a String to catch all the wrong inpu
 
 
 ```
+
+
+// TODO
+- On closing the new game season, need to set the status to closed (so that it is basically archived)

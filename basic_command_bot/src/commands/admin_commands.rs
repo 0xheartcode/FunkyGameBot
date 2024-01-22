@@ -15,7 +15,16 @@ use crate::database::{
     DbPool
 };
 
-use crate::commands::season::{start_new_season, stop_current_season, current_active_season, current_active_season_details};
+use crate::commands::season::{
+    start_new_season, 
+    stop_current_season, 
+    current_active_season, 
+    current_active_season_details,
+    start_signup_phase,
+    stop_signup_phase,
+    start_gaming_phase,
+    stop_gaming_phase,
+};
 
 //
 //TODO AdminCommands
@@ -36,7 +45,8 @@ pub async fn add_admin_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>, us
     } else if is_admin(db_pool, &username)? {
         bot.send_message(msg.chat.id, format!("@{} is already an admin.", username)).await?;
     } else {
-        add_admin(db_pool, username);
+        //ignoring for now. Might handle Err properly later.
+        let _ = add_admin(db_pool, username);
         bot.send_message(msg.chat.id, format!("Added @{} to admin list.", username)).await?;
     }
     Ok(())
@@ -55,7 +65,8 @@ pub async fn remove_admin_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>,
             bot.send_message(msg.chat.id, format!("User @{} is not in the admin list.", username)).await?;
         }
     } else {
-        remove_admin(db_pool, &username);
+        //ignoring for now. Might handle Err properly later.
+        let _ = remove_admin(db_pool, &username); 
         bot.send_message(msg.chat.id, format!("Removed @{} from admin list.", username)).await?;
     }
     Ok(())
@@ -76,7 +87,6 @@ pub async fn list_admins_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) 
 }
 
 
-// TODO GOAL A
 
 pub async fn start_new_season_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>, season_info: String) -> Result<(), Box<dyn Error + Send + Sync>> {
         if !is_authorized_sender(&msg, db_pool) {
@@ -148,7 +158,7 @@ pub async fn stop_new_season_command(bot: Bot, msg: Message, db_pool: &Arc<DbPoo
     }
     // Check if there is an active season
     match current_active_season_details(db_pool).await {
-        Ok(Some((season_name, _, _))) => {
+        Ok(Some((season_name, _, _, _))) => {
             // Stop the active season
             match stop_current_season(db_pool).await {
                 Ok(_) => {
@@ -183,10 +193,10 @@ pub async fn current_season_status_command(bot: Bot, msg: Message, db_pool: &Arc
 
     // Check if there is an active season
     match current_active_season_details(db_pool).await {
-        Ok(Some((name, start_date, max_players))) => {
+        Ok(Some((name, start_date, max_players, status))) => {
             let message = format!(
-                "Current active season: '{}'\nStarted on: {}\nMax players: {}",
-                name, start_date, max_players
+                "Current active season: '{}'\nStarted on: {}\nMax players: {}\nStatus: {}",
+                name, start_date, max_players, status
             );
             bot.send_message(msg.chat.id, message).await?;
         },
@@ -203,33 +213,135 @@ pub async fn current_season_status_command(bot: Bot, msg: Message, db_pool: &Arc
 
 
 
-// TODO GOAL B
+// TODO GOAL A+B
 
 pub async fn startsignupphase_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
         if !is_authorized_sender(&msg, db_pool) {
         return Ok(());  // Early return if the sender is not authorized
     }
-    bot.send_message(msg.chat.id, "The signup phase for the new rock-paper-scissors season is now open. Interested players can register.").await?; 
-   Ok(())
+
+    // Attempt to start the signup phase
+    // Check the current season's status
+    match current_active_season_details(db_pool).await {
+        Ok(Some((name, _, _, status))) => {
+            match status.as_str() {
+                "start_signup" => {
+                    bot.send_message(msg.chat.id, "Signup has already started.").await?;
+                },
+                "start_gaming" => {
+                    bot.send_message(msg.chat.id, "The game has already started. We cannot open the signup now. Let's be fair.").await?;
+                },
+                "stopped_gaming" => {
+                    bot.send_message(msg.chat.id, "The game already started. And seems it also ended. Not a time to open sign-ups.").await?;
+                },
+                _ => {
+                    // If none of the above, attempt to start the signup phase
+                    match start_signup_phase(db_pool).await {
+                        Ok(_) => {
+                            bot.send_message(msg.chat.id, format!("The signup phase for the new rock-paper-scissors season '{}' is now open. Interested players can register.", name)).await?;
+                        },
+                        Err(e) => {
+                            log::info!("Failed to start the signup phase: {}", e);
+                            bot.send_message(msg.chat.id, format!("Failed to start the signup phase: {}", e)).await?;
+                        }
+                    }
+                }
+            }
+        },
+        Ok(None) => {
+            bot.send_message(msg.chat.id, "There is no active season currently.").await?;
+        },
+        Err(e) => {
+            bot.send_message(msg.chat.id, format!("Failed to get current season status: {}", e)).await?;
+        }
+    }
+
+    Ok(())
 }
 
 pub async fn stopsignupphase_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
         if !is_authorized_sender(&msg, db_pool) {
         return Ok(());  // Early return if the sender is not authorized
     }
-   bot.send_message(msg.chat.id, "The signup phase is now closed. Preparations for the game will now commence.").await?; 
+
+    // Check the current season's status
+    match current_active_season_details(db_pool).await {
+        Ok(Some((name, _, _, status))) => {
+            match status.as_str() {
+                "stopped_signup" => {
+                    bot.send_message(msg.chat.id, "Signup has already stopped!").await?;
+                },
+                "start_gaming" => {
+                    bot.send_message(msg.chat.id, "The game has already started. This command is not valid.").await?;
+                },
+                "stopped_gaming" => {
+                    bot.send_message(msg.chat.id, "The game already started. And seems it also ended. This command is not valid.").await?;
+                },
+                _ => {
+                    // If none of the above, attempt to start the signup phase
+                    match stop_signup_phase(db_pool).await {
+                        Ok(_) => {
+                            bot.send_message(msg.chat.id, format!("The signup phase is now closed. Preparations for the '{}' game will now commence.", name)).await?;
+                        },
+                        Err(e) => {
+                            log::info!("Failed to stop the signup phase: {}", e);
+                            bot.send_message(msg.chat.id, format!("Failed to stop the signup phase: {}", e)).await?;
+                        }
+                    }
+                }
+            }
+        },
+        Ok(None) => {
+            bot.send_message(msg.chat.id, "There is no active season currently.").await?;
+        },
+        Err(e) => {
+            bot.send_message(msg.chat.id, format!("Failed to get current season status: {}", e)).await?;
+        }
+    }
+
     Ok(())
 }
-
-
-// TODO GOAL C
 
 
 pub async fn startgamingphase_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
         if !is_authorized_sender(&msg, db_pool) {
         return Ok(());  // Early return if the sender is not authorized
     }
-    bot.send_message(msg.chat.id, "The gaming phase has begun! Players, get ready to challenge each other.").await?;
+    // Check the current season's status
+    match current_active_season_details(db_pool).await {
+        Ok(Some((name, _, _, status))) => {
+            match status.as_str() {
+                "start_gaming" => {
+                    bot.send_message(msg.chat.id, "The game has already started!").await?;
+                },
+                "start_signup" => {
+                    bot.send_message(msg.chat.id, "The signup phase has not been completed. Please finish it first.").await?;
+                },
+                "initial" => {
+                    bot.send_message(msg.chat.id, "The season just started. Please start the signup phase first, we need players.").await?;
+                },
+                _ => {
+                    // If none of the above, attempt to start the signup phase
+                    match start_gaming_phase(db_pool).await {
+                        Ok(_) => {
+                            bot.send_message(msg.chat.id, format!("The gaming phase has begun! Welcome to '{}'.Players, get ready to challenge each other.", name)).await?;
+                        },
+                        Err(e) => {
+                            log::info!("Failed to start the signup phase: {}", e);
+                            bot.send_message(msg.chat.id, format!("Failed to start the signup phase: {}", e)).await?;
+                        }
+                    }
+                }
+            }
+        },
+        Ok(None) => {
+            bot.send_message(msg.chat.id, "There is no active season currently.").await?;
+        },
+        Err(e) => {
+            bot.send_message(msg.chat.id, format!("Failed to get current season status: {}", e)).await?;
+        }
+    }
+
     Ok(())
 }
 
@@ -237,10 +349,49 @@ pub async fn stopgamingphase_command(bot: Bot, msg: Message, db_pool: &Arc<DbPoo
         if !is_authorized_sender(&msg, db_pool) {
         return Ok(());  // Early return if the sender is not authorized
     }
-    bot.send_message(msg.chat.id, "The gaming phase has ended. Thank you to all participants!").await?;
+    // Check the current season's status
+    match current_active_season_details(db_pool).await {
+        Ok(Some((_name, _, _, status))) => {
+            match status.as_str() {
+                "stopped_gaming" => {
+                    bot.send_message(msg.chat.id, "The game has already started!").await?;
+                },
+                "stopped_signup" => {
+                    bot.send_message(msg.chat.id, "Oh, the signup is closed, however, the game hasn't started yet. Start a game to close it.").await?;
+                },
+                "start_signup" => {
+                    bot.send_message(msg.chat.id, "The signup phase has not been completed. Please finish it first, and then start the gaming phase.").await?;
+                },
+                "initial" => {
+                    bot.send_message(msg.chat.id, "The season just started. Please start the signup phase first, stop it, start the game phase. Then we can talk about closing the game.").await?;
+                },
+                _ => {
+                    // If none of the above, attempt to start the signup phase
+                    match stop_gaming_phase(db_pool).await {
+                        Ok(_) => {
+                            bot.send_message(msg.chat.id, format!("The gaming phase has ended. Thank you to all participants! Remember to /stopnewseason when you're done.")).await?;
+                        },
+                        Err(e) => {
+                            log::info!("Failed to stop the gaming phase: {}", e);
+                            bot.send_message(msg.chat.id, format!("Failed to stop the gaming phase: {}", e)).await?;
+                        }
+                    }
+                }
+            }
+        },
+        Ok(None) => {
+            bot.send_message(msg.chat.id, "There is no active season currently.").await?;
+        },
+        Err(e) => {
+            bot.send_message(msg.chat.id, format!("Failed to get current season status: {}", e)).await?;
+        }
+    }    
+
     Ok(())
 }
 
+// TODO C
+//
 pub async fn start_round_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
         if !is_authorized_sender(&msg, db_pool) {
         return Ok(());  // Early return if the sender is not authorized
@@ -276,6 +427,8 @@ pub async fn refuseplayer_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>)
     Ok(())
 }
 
+// TODO D
+//
 pub async fn view_signuplist_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
         if !is_authorized_sender(&msg, db_pool) {
         return Ok(());  // Early return if the sender is not authorized

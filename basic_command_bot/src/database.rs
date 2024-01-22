@@ -46,7 +46,7 @@ pub fn init_db_pool() -> DbPool {
             ).expect("Failed to insert default administrator");
         }
     }
-
+    //conn.execute("DROP TABLE IF EXISTS seasons", []).expect("Failed to drop table"); // Reset switch
     conn.execute(
     "CREATE TABLE IF NOT EXISTS seasons (
         id INTEGER PRIMARY KEY,
@@ -54,7 +54,8 @@ pub fn init_db_pool() -> DbPool {
         is_active BOOLEAN NOT NULL,
         max_players INTEGER NOT NULL,
         start_date TEXT,
-        stop_date TEXT
+        stop_date TEXT,
+        status TEXT NOT NULL DEFAULT 'initial'
         )",
         [],
     ).expect("Failed to create modified seasons table");
