@@ -102,21 +102,21 @@ pub enum AdminCommand {
 
         ")]
     CurrentSeasonStatus,
-    #[command(description = "Begin the signup phase for players. 🟠")]
+    #[command(description = "Begin the signup phase for players. 🟢")]
     StartSignupPhase,
-    #[command(description = "End the signup phase for players. 🟠")]
+    #[command(description = "End the signup phase for players. 🟢")]
     StopSignupPhase,
-    #[command(description = "Start the gaming phase. 🟠")]
+    #[command(description = "Start the gaming phase. 🟢")]
     StartGamingPhase,
 
-    #[command(description = "Stop the gaming phase.
+    #[command(description = "Stop the gaming phase. 🟢
 
         ")]
     StopGamingPhase,
-    #[command(description = "The core of the game, start a round.")]
+    #[command(description = "The core of the game, start a round.🟠")]
     StartRound,
 
-    #[command(description = "Stop a game round.
+    #[command(description = "Stop a game round. 🟠
 
         ")]
     StopRound,    
@@ -138,9 +138,9 @@ pub enum AdminCommand {
     SetBroadcastChannel,
     #[command(description = "Set the group channel ID for group-related messages. 🟠")]
     SetGroupChannel,
-    #[command(description = "Send a message to the broadcast channel. 🟠")]
+    #[command(description = "Send a message to the broadcast channel.")]
     MsgBroadcastChannel,
-    #[command(description = "Send a message to the group channel. 🟠")]
+    #[command(description = "Send a message to the group channel.")]
     MsgGroup,
     #[command(description = "Retrieve the current ID of the group and broadcast channel. 🟠")]
     GetGroupBroadcastId,
