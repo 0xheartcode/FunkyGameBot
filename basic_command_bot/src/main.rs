@@ -44,19 +44,22 @@ use commands::admin_commands::{
     view_signuplist_command,
     view_approved_list_command,
     viewrefusedlist_command,
-    set_broadcastchannel_command,
-    set_group_command,
     msg_broadcastchannel_command,
     msg_group_command,
-    get_group_broadcast_id_command,
-    reset_group_broadcast_command
 };
 
 use commands::dev_commands::{
     username_command, 
     username_and_age_command, 
     write_sql_command, 
-    read_sql_command
+    read_sql_command,
+};
+
+use commands::grp_broadcast_commands::{
+    set_broadcast_channel_command,
+    set_group_channel_command,
+    get_group_broadcast_id_command,
+    reset_group_broadcast_command,
 };
 
 use commands::changelogread::{
@@ -212,16 +215,16 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
             )
         )
         .branch(
-            case![Command::SetBroadcastChannel].endpoint(
-                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
-                    set_broadcastchannel_command(bot, msg, &db_pool).await
+            case![Command::SetBroadcastChannel(channel_id)].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>, channel_id: String| async move {
+                    set_broadcast_channel_command(bot, msg, &db_pool, channel_id).await
                 }
             )
         )
         .branch(
-            case![Command::SetGroupChannel].endpoint(
-                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
-                    set_group_command(bot, msg, &db_pool).await
+            case![Command::SetGroupChannel(channel_id)].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>, channel_id:String| async move {
+                    set_group_channel_command(bot, msg, &db_pool, channel_id).await
                 }
             )
         )

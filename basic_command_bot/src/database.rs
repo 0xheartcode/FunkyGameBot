@@ -60,6 +60,22 @@ pub fn init_db_pool() -> DbPool {
         [],
     ).expect("Failed to create modified seasons table");
 
+    conn.execute("DROP TABLE IF EXISTS channel_settings", []).expect("Failed to drop table"); // Reset switch
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS channel_settings (
+            id INTEGER PRIMARY KEY,
+            broadcast_channel_id TEXT,
+            group_channel_id TEXT
+        )",
+        [],
+    ).expect("Failed to create channel_settings table");
+
+    // insert initial row. Not sure why it should be created but we will see.
+    conn.execute(
+        "INSERT INTO channel_settings (id, broadcast_channel_id, group_channel_id) VALUES (1, NULL, NULL) ON CONFLICT(id) DO NOTHING",
+        [],
+    ).expect("Failed to insert initial row into channel_settings");
+
     pool
 }
 

@@ -68,9 +68,9 @@ pub enum Command {
     #[command(description = "View the current leaderboard.")]
     ViewLeaderboard,
     #[command(description = "off")]
-    SetBroadcastChannel,
+    SetBroadcastChannel(String),
     #[command(description = "off")]
-    SetGroupChannel,
+    SetGroupChannel(String),
     #[command(description = "off")]
     MsgBroadcastChannel,
     #[command(description = "off")]
@@ -128,23 +128,23 @@ pub enum AdminCommand {
 
         ")]
     ViewRefusedList,
-    #[command(description = "Approve a player's signup request.")]
+    #[command(description = "Approve a player's signup request. 🟠")]
     ApprovePlayer,
-    #[command(description = "Refuse a player's signup request.
+    #[command(description = "Refuse a player's signup request. 🟠
 
         ")]
     RefusePlayer,
-    #[command(description = "Set the channel ID for broadcasting messages. 🟠")]
+    #[command(description = "Set the channel ID for broadcasting messages. 🟢")]
     SetBroadcastChannel,
-    #[command(description = "Set the group channel ID for group-related messages. 🟠")]
+    #[command(description = "Set the group channel ID for group-related messages. 🟢")]
     SetGroupChannel,
     #[command(description = "Send a message to the broadcast channel.")]
     MsgBroadcastChannel,
     #[command(description = "Send a message to the group channel.")]
     MsgGroup,
-    #[command(description = "Retrieve the current ID of the group and broadcast channel. 🟠")]
+    #[command(description = "Retrieve the current ID of the group and broadcast channel. 🟢")]
     GetGroupBroadcastId,
-    #[command(description = "Reset the group and broadcast channel settings.  🟠")]
+    #[command(description = "Reset the group and broadcast channel settings.  🟢")]
     ResetGroupBroadcast,
     #[command(description = "Read the changelog. 🟢")]
     ReadChangelog,

@@ -8,7 +8,7 @@ const MAX_MESSAGE_LENGTH: usize = 4096;
 
 pub async fn send_changelog(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
     let mut changelog_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    changelog_path.push("./Changelog.txt");
+    changelog_path.push("./Changelog.md");
     let changelog = fs::read_to_string(changelog_path)?;
 
     // Define the characters that need to be escaped

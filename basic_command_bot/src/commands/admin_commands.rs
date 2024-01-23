@@ -456,23 +456,6 @@ pub async fn viewrefusedlist_command(bot: Bot, msg: Message, db_pool: &Arc<DbPoo
 //
 // TODO Broadcast and Group messages
 //
-//
-
-pub async fn set_broadcastchannel_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
-        if !is_authorized_sender(&msg, db_pool) {
-        return Ok(());  // Early return if the sender is not authorized
-    }
-    bot.send_message(msg.chat.id, "This is a command to set the broadcast channel").await?;
-    Ok(())
-}
-
-pub async fn set_group_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
-        if !is_authorized_sender(&msg, db_pool) {
-        return Ok(());  // Early return if the sender is not authorized
-    }
-    bot.send_message(msg.chat.id, "This is a command to set the group channel").await?;
-    Ok(())
-}
 
 pub async fn msg_broadcastchannel_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
         if !is_authorized_sender(&msg, db_pool) {
@@ -489,25 +472,4 @@ pub async fn msg_group_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) ->
     bot.send_message(msg.chat.id, "Send a message to the group channel").await?;
     Ok(())
 }
-
-
-pub async fn get_group_broadcast_id_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
-    if !is_authorized_sender(&msg, db_pool) {
-        return Ok(());  // Early return if the sender is not authorized
-    }
-    bot.send_message(msg.chat.id, "Retrieving the group and broadcast channel ID if set").await?;
-    Ok(())
-}
-
-
-pub async fn reset_group_broadcast_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
-    if !is_authorized_sender(&msg, db_pool) {
-        return Ok(());  // Early return if the sender is not authorized
-    }
-    bot.send_message(msg.chat.id, "Reseting group and Broadcast channel. Global messages will not work anymore.").await?;
-    Ok(())
-}
-
-
-
 
