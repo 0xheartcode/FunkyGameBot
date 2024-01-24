@@ -19,6 +19,7 @@ use crate::commands::season::{
     start_new_season, 
     stop_current_season, 
     current_active_season, 
+    current_active_season_id, 
     current_active_season_details,
     start_signup_phase,
     stop_signup_phase,
@@ -407,6 +408,11 @@ pub async fn stop_round_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -
     bot.send_message(msg.chat.id, "Round is over, everyone back to their corner !").await?;
     Ok(())
 }
+
+
+
+
+
 
 // TODO GOAL D
 

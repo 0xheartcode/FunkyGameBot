@@ -32,6 +32,17 @@ pub async fn current_active_season(pool: &DbPool) -> Result<Option<String>, Rusq
     Ok(season_title)
 }
 
+// Function to check if a season is running and return its id
+pub async fn current_active_season_id(pool: &DbPool) -> Result<Option<String>, RusqliteError> {
+    let conn = pool.get().expect("Failed to get connection from pool");
+    let season_id: Option<String> = conn.query_row(
+        "SELECT id FROM seasons WHERE is_active = true LIMIT 1",
+        [],
+        |row| row.get(0),
+    ).optional()?;
+    Ok(season_id)
+}
+
 // Function to get details of the current active season
 pub async fn current_active_season_details(pool: &DbPool) -> Result<Option<(String, String, i32, String)>, RusqliteError> {
     let conn = pool.get().expect("Failed to get connection from pool");

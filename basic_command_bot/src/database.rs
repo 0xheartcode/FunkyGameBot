@@ -60,7 +60,7 @@ pub fn init_db_pool() -> DbPool {
         [],
     ).expect("Failed to create modified seasons table");
 
-    conn.execute("DROP TABLE IF EXISTS channel_settings", []).expect("Failed to drop table"); // Reset switch
+    //conn.execute("DROP TABLE IF EXISTS channel_settings", []).expect("Failed to drop table"); // Reset switch
     conn.execute(
         "CREATE TABLE IF NOT EXISTS channel_settings (
             id INTEGER PRIMARY KEY,
@@ -75,6 +75,37 @@ pub fn init_db_pool() -> DbPool {
         "INSERT INTO channel_settings (id, broadcast_channel_id, group_channel_id) VALUES (1, NULL, NULL) ON CONFLICT(id) DO NOTHING",
         [],
     ).expect("Failed to insert initial row into channel_settings");
+    
+    // Create the MasterRoundTable
+    //conn.execute("DROP TABLE IF EXISTS MasterRoundTable", []).expect("Failed to drop MasterRoundTable"); // Reset switch
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS MasterRoundTable (
+            id INTEGER PRIMARY KEY,
+            season_id INTEGER,
+            round_number INTEGER NOT NULL,
+            start_time TEXT,
+            end_time TEXT,
+            FOREIGN KEY(season_id) REFERENCES Seasons(id)
+        )",
+        [],
+    ).expect("Failed to create MasterRoundTable");
+
+    // Create the RoundDetailsTable
+    //conn.execute("DROP TABLE IF EXISTS RoundDetailsTable", []).expect("Failed to drop RoundDetailsTable"); // Reset switch
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS RoundDetailsTable (
+            id INTEGER PRIMARY KEY,
+            round_id INTEGER,
+            player_id INTEGER,
+            player_hand TEXT,
+            opponent INTEGER,
+            opponent_hand TEXT,
+            timestamp TEXT,
+            game_status TEXT,
+            FOREIGN KEY(round_id) REFERENCES MasterRoundTable(id)
+        )",
+        [],
+    ).expect("Failed to create RoundDetailsTable");
 
     pool
 }

@@ -1,3 +1,20 @@
+## January 23 Updates
+
+### New Commands
+
+- `/setbroadcastchannel`: Sets the ID for the broadcast channel.
+
+- `/setgroupchannel`: Sets the ID for the group channel.
+
+- `/getgroupbroadcastid`: Retrieves the current IDs of the group and broadcast channels.
+
+- `/resetgroupbroadcast`: Resets the settings for the group and broadcast channels.
+
+### Database Schema Update
+
+- Modified the database schema to include a new table `channel_settings`. This table is designed to store the IDs for the broadcast and group channels.
+
+
 # January 22, 2024
 ## New Command Implementations:
 
