@@ -1,3 +1,9 @@
+## January 24 Updates
+
+- database_schema.md published
+
+- started implementing the round function. Logic not there yet.
+
 ## January 23 Updates
 
 ### New Commands
