@@ -113,18 +113,18 @@ pub enum AdminCommand {
 
         ")]
     StopGamingPhase,
-    #[command(description = "The core of the game, start a round.🟠")]
+    #[command(description = "The core of the game, start a round.🟢")]
     StartRound,
 
-    #[command(description = "Stop a game round. 🟠
+    #[command(description = "Stop a game round. 🟢
 
         ")]
     StopRound,    
-    #[command(description = "View the list of players who signed up.")]
+    #[command(description = "View the list of players who signed up. 🟠")]
     ViewSignupList,
-    #[command(description = "View the list of approved players.")]
+    #[command(description = "View the list of approved players. 🟠")]
     ViewApprovedList,
-    #[command(description = "View the list of refused players.
+    #[command(description = "View the list of refused players. 🟠
 
         ")]
     ViewRefusedList,
@@ -138,9 +138,9 @@ pub enum AdminCommand {
     SetBroadcastChannel,
     #[command(description = "Set the group channel ID for group-related messages. 🟢")]
     SetGroupChannel,
-    #[command(description = "Send a message to the broadcast channel.")]
+    #[command(description = "Send a message to the broadcast channel. 🟠")]
     MsgBroadcastChannel,
-    #[command(description = "Send a message to the group channel.")]
+    #[command(description = "Send a message to the group channel. 🟠")]
     MsgGroup,
     #[command(description = "Retrieve the current ID of the group and broadcast channel. 🟢")]
     GetGroupBroadcastId,

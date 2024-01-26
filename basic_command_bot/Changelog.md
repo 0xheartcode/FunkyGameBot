@@ -1,3 +1,11 @@
+## January 26 Updates
+
+### Function Implementations and Bug Fixes
+
+- Continued implementing and finished implementing the round-related functions, starting and stopping game rounds.
+
+- Added a new 'round_ongoing' status.
+-
 ## January 24 Updates
 
 - database_schema.md published
