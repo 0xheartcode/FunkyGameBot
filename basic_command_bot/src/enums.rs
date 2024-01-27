@@ -72,9 +72,9 @@ pub enum Command {
     #[command(description = "off")]
     SetGroupChannel(String),
     #[command(description = "off")]
-    MsgBroadcastChannel,
+    MsgBroadcastChannel(String),
     #[command(description = "off")]
-    MsgGroup,
+    MsgGroup(String),
     #[command(description = "off")]
     GetGroupBroadcastId,
     #[command(description = "off")]
@@ -138,9 +138,9 @@ pub enum AdminCommand {
     SetBroadcastChannel,
     #[command(description = "Set the group channel ID for group-related messages. 🟢")]
     SetGroupChannel,
-    #[command(description = "Send a message to the broadcast channel. 🟠")]
+    #[command(description = "Send a message to the broadcast channel. 🟢")]
     MsgBroadcastChannel,
-    #[command(description = "Send a message to the group channel. 🟠")]
+    #[command(description = "Send a message to the group channel. 🟢")]
     MsgGroup,
     #[command(description = "Retrieve the current ID of the group and broadcast channel. 🟢")]
     GetGroupBroadcastId,

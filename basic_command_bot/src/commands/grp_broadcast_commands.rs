@@ -134,3 +134,43 @@ pub async fn reset_group_broadcast(pool: &DbPool) -> Result<(), RusqliteError> {
     conn.execute("UPDATE channel_settings SET broadcast_channel_id = NULL, group_channel_id = NULL WHERE id = 1", [])?;
     Ok(())
 }
+
+pub async fn msg_broadcastchannel_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>, message_text: String) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if !is_authorized_sender(&msg, db_pool) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+    // TODO no safety here. Doesn't say if it does not work. 
+    let (broadcast_channel_id, _) = get_group_broadcast_ids(db_pool).await?;
+    if let Some(channel_id_str) = broadcast_channel_id {
+        let mut channel_id: i64 = channel_id_str.parse()?;
+        channel_id *= -1; // Make it negative
+        bot.send_message(ChatId(channel_id), message_text).await?;
+        bot.send_message(msg.chat.id, "Sends a message to the broadcast channel").await?;
+    } else {
+        bot.send_message(msg.chat.id, "Broadcast channel is not set.").await?;
+    }
+
+    Ok(())
+}
+
+pub async fn msg_group_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>, message_text: String) -> Result<(), Box<dyn Error + Send + Sync>> {
+    if !is_authorized_sender(&msg, db_pool) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+    // Retrieve the group channel ID from the database
+    let (_, group_channel_id) = get_group_broadcast_ids(db_pool).await?;
+    
+    if let Some(channel_id_str) = group_channel_id {
+        // Parse the channel ID string as an i64
+        let mut channel_id: i64 = channel_id_str.parse()?;
+        channel_id *= -1;
+
+        // Send the message to the group channel
+        bot.send_message(ChatId(channel_id), message_text.clone()).await?;
+        bot.send_message(msg.chat.id, "Sent the message to the group channel").await?;
+    } else {
+        bot.send_message(msg.chat.id, "Group channel is not set.").await?;
+    }
+
+    Ok(())
+}

@@ -128,8 +128,6 @@ pub async fn get_next_round_number(pool: &DbPool, current_season_id: &i32) -> Re
     let conn = pool.get().expect("Failed to get connection from pool");
 
     // Fetch the highest round number for the current season
-    let mut stmt = conn.prepare("SELECT MAX(round_number) FROM MasterRoundTable WHERE season_id = ?1")?;
-    println!("ZZZ");
     let max_round_number: i32 = conn.query_row(
         "SELECT IFNULL(MAX(round_number), 0) FROM MasterRoundTable WHERE season_id = ?1",
         params![current_season_id],

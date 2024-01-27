@@ -217,7 +217,6 @@ pub async fn current_season_status_command(bot: Bot, msg: Message, db_pool: &Arc
 
 
 
-// TODO GOAL A+B
 
 pub async fn startsignupphase_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
         if !is_authorized_sender(&msg, db_pool) {
@@ -406,8 +405,6 @@ pub async fn stopgamingphase_command(bot: Bot, msg: Message, db_pool: &Arc<DbPoo
     Ok(())
 }
 
-// TODO C
-//
 pub async fn start_round_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
     if !is_authorized_sender(&msg, db_pool) {
         return Ok(());  // Early return if the sender is not authorized
@@ -492,7 +489,7 @@ pub async fn refuseplayer_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>)
     Ok(())
 }
 
-// TODO D
+// TODO E
 //
 pub async fn view_signuplist_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
         if !is_authorized_sender(&msg, db_pool) {
@@ -515,26 +512,6 @@ pub async fn viewrefusedlist_command(bot: Bot, msg: Message, db_pool: &Arc<DbPoo
         return Ok(());  // Early return if the sender is not authorized
     }
     bot.send_message(msg.chat.id, "Here's the list of players whose requests were refused: ...").await?;
-    Ok(())
-}
-
-//
-// TODO Broadcast and Group messages
-//
-
-pub async fn msg_broadcastchannel_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
-        if !is_authorized_sender(&msg, db_pool) {
-        return Ok(());  // Early return if the sender is not authorized
-    }
-    bot.send_message(msg.chat.id, "Send a message to the broadcast channel").await?;
-    Ok(())
-}
-
-pub async fn msg_group_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
-        if !is_authorized_sender(&msg, db_pool) {
-        return Ok(());  // Early return if the sender is not authorized
-    }
-    bot.send_message(msg.chat.id, "Send a message to the group channel").await?;
     Ok(())
 }
 

@@ -44,8 +44,6 @@ use commands::admin_commands::{
     view_signuplist_command,
     view_approved_list_command,
     viewrefusedlist_command,
-    msg_broadcastchannel_command,
-    msg_group_command,
 };
 
 use commands::dev_commands::{
@@ -60,6 +58,8 @@ use commands::grp_broadcast_commands::{
     set_group_channel_command,
     get_group_broadcast_id_command,
     reset_group_broadcast_command,
+    msg_broadcastchannel_command,
+    msg_group_command,
 };
 
 use commands::changelogread::{
@@ -229,16 +229,16 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
             )
         )
         .branch(
-            case![Command::MsgBroadcastChannel].endpoint(
-                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
-                    msg_broadcastchannel_command(bot, msg, &db_pool).await
+            case![Command::MsgBroadcastChannel(message_text)].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>, message_text:String| async move {
+                    msg_broadcastchannel_command(bot, msg, &db_pool, message_text).await
                 }
             )
         )
         .branch(
-            case![Command::MsgGroup].endpoint(
-                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
-                    msg_group_command(bot, msg, &db_pool).await
+            case![Command::MsgGroup(message_text)].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>, message_text:String| async move {
+                    msg_group_command(bot, msg, &db_pool, message_text).await
                 }
             )
         )
@@ -296,7 +296,8 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
 async fn handle_invalid_text_message(bot: Bot, msg: Message) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     if let Some(username) = msg.from().and_then(|user| user.username.clone()) {
         log::info!("From: {} Received an invalid text message.", username);
-        log::info!("Content: {}",msg.text().unwrap_or_default());
+        log::info!("ChatId: {}, Date {}\n Content: {}", msg.chat_id(), msg.date, msg.text().unwrap_or_default());
+        //log::info!("{:?}",msg);
     }
     bot.send_message(msg.chat.id, "Received your message, this is not a valid command. Try /help.").await?;
     Ok(())
