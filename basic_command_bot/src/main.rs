@@ -24,6 +24,7 @@ use commands::basic_commands::{
     signup_command, 
     version_command,
     viewleaderboard_command,
+    status_command,
 };
 
 use commands::admin_commands::{
@@ -100,6 +101,7 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
         .branch(case![Command::Signup].endpoint(signup_command))
         .branch(case![Command::Version].endpoint(version_command))
         .branch(case![Command::ViewLeaderboard].endpoint(viewleaderboard_command))
+        .branch(case![Command::Status].endpoint(status_command))
         //
         //DevCommands
         //
@@ -296,7 +298,7 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
 async fn handle_invalid_text_message(bot: Bot, msg: Message) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     if let Some(username) = msg.from().and_then(|user| user.username.clone()) {
         log::info!("From: {} Received an invalid text message.", username);
-        log::info!("ChatId: {}, Date {}\n Content: {}", msg.chat_id(), msg.date, msg.text().unwrap_or_default());
+        log::info!("ChatId: {}, Date {}\n Content: {}", msg.chat.id, msg.date, msg.text().unwrap_or_default());
         //log::info!("{:?}",msg);
     }
     bot.send_message(msg.chat.id, "Received your message, this is not a valid command. Try /help.").await?;

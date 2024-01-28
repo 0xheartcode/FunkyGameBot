@@ -10,10 +10,12 @@ pub enum Command {
     //
     #[command(description = "Display this text. 🟢")]
     Help,
-    #[command(description = "Register for a new game season.")]
+    #[command(description = "Register for a new game season. 🟠")]
     Signup,
     #[command(description = "Get the current version. 🟢")]
     Version,
+    #[command(description = "Information regarding the current season 🟠")]
+    Status,
     //
     //DevCommands
     //

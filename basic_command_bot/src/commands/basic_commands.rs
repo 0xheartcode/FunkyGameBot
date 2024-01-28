@@ -1,12 +1,17 @@
 /// basic_commands.rs
 
 use teloxide::{prelude::*, utils::command::BotCommands};
-use std::{error::Error};
+use std::{error::Error, sync::Arc};
 use crate::enums::{Command, AdminCommand, DevCommand};
 use crate::admin::{is_authorized_dev, is_authorized_sender};
 
-use std::sync::Arc;
 use crate::database::{DbPool};
+
+use crate::commands::season::{
+    current_active_season_details,
+};
+
+
 //
 //
 //TODO BasicCommands
@@ -32,21 +37,10 @@ pub async fn signup_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error 
 
 // TODO enable checking the Cargo.toml file for version.
 pub async fn version_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
-    bot.send_message(msg.chat.id, "The current version of the bot is v0.0.1.").await?;
+    bot.send_message(msg.chat.id, "The current version of the bot is v0.0.2.").await?;
     Ok(())
 }
 
-// TODO you have joined a game, you need to join the game with a hand
-pub async fn join_game_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
-    bot.send_message(msg.chat.id, "You have joined the game. Or are trying to, this command is being built.").await?;
-    Ok(())
-}
-
-// TODO you have created a game, you need to create the game with a hand
-pub async fn create_game_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
-    bot.send_message(msg.chat.id, "You have created a game. Command being built.").await?;
-    Ok(())
-}
 
 // TODO
 pub async fn viewleaderboard_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
@@ -54,8 +48,29 @@ pub async fn viewleaderboard_command(bot: Bot, msg: Message) -> Result<(), Box<d
     Ok(())
 }
 
-// TODO
-pub async fn viewleaderboard_specificseason_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
-    bot.send_message(msg.chat.id, "The leaderboard standings for a specific game: ...").await?;
+pub async fn status_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
+    if !is_authorized_sender(&msg, db_pool) {
+        return Ok(());  // Early return if the sender is not authorized
+    }
+
+    // Check if there is an active season
+    match current_active_season_details(db_pool).await {
+        Ok(Some((name, start_date, max_players, status))) => {
+            let message = format!(
+                "Current active season: '{}'\nStarted on: {}\nMax players: {}\nStatus: {}",
+                name, start_date, max_players, status
+            );
+            bot.send_message(msg.chat.id, message).await?;
+        },
+        Ok(None) => {
+            bot.send_message(msg.chat.id, "There is no active season currently.").await?;
+        },
+        Err(e) => {
+            bot.send_message(msg.chat.id, format!("Failed to get current season status: {}", e)).await?;
+        }
+    }
+
     Ok(())
 }
+
+

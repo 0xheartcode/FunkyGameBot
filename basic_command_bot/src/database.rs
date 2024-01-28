@@ -107,6 +107,35 @@ pub fn init_db_pool() -> DbPool {
         [],
     ).expect("Failed to create RoundDetailsTable");
 
+
+    // Create the PlayerDetailsTable
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS PlayerDetailsTable (
+            id INTEGER PRIMARY KEY,
+            season_id INTEGER,
+            player_id INTEGER,
+            player_username TEXT,
+            player_wallet TEXT,
+            score INTEGER,
+            FOREIGN KEY(season_id) REFERENCES Seasons(id)
+        )",
+        [],
+    ).expect("Failed to create PlayerDetailsTable");
+
+    // Create the MasterCandidateTable
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS MasterCandidateTable (
+            id INTEGER PRIMARY KEY,
+            season_id INTEGER,
+            player_id INTEGER,
+            player_username TEXT,
+            player_wallet TEXT,
+            player_status TEXT,
+            FOREIGN KEY(season_id) REFERENCES Seasons(id)
+        )",
+        [],
+    ).expect("Failed to create MasterCandidateTable");
+
     pool
 }
 
