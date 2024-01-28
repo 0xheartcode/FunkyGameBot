@@ -423,18 +423,13 @@ pub async fn start_round_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) 
     }
 
     // Get the current active season ID
-    println!("000");
     let current_season_id = current_active_season_id(db_pool).await?;
-    println!("AAA");
     if let Some(season_id_str) = current_season_id {
         // Get the next round number
-        println!("BBB");
         let next_round_number = get_next_round_number(db_pool, &season_id_str).await?;
-        println!("CCC");
 
         // Start the new round
         start_new_round(db_pool, season_id_str, next_round_number).await?;
-        println!("DDD");
         bot.send_message(msg.chat.id, "Finally, let us start the round!").await?;
     } else {
         bot.send_message(msg.chat.id, "No active season ID found.").await?;

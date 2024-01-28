@@ -18,11 +18,11 @@ pub enum Command {
 
         ")]
     Status,
-    #[command(description = "Play the rock hand. 🟠")]
+    #[command(description = "Play the rock hand. 🟢")]
     PlayRock,
-    #[command(description = "Play the paper hand. 🟠")]
+    #[command(description = "Play the paper hand. 🟢")]
     PlayPaper,
-    #[command(description = "Play the scissors hand. 🟠")]
+    #[command(description = "Play the scissors hand. 🟢")]
     PlayScissors,
     //
     //DevCommands

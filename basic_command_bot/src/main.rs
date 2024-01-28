@@ -122,9 +122,27 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
                 }
             )
         ) 
-        .branch(case![Command::PlayRock].endpoint(playrock_command))
-        .branch(case![Command::PlayPaper].endpoint(playpaper_command))
-        .branch(case![Command::PlayScissors].endpoint(playscissors_command))
+        .branch(
+            case![Command::PlayRock].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    playrock_command(bot, msg, &db_pool).await
+                }
+            )
+        ) 
+        .branch(
+            case![Command::PlayPaper].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    playpaper_command(bot, msg, &db_pool).await
+                }
+            )
+        ) 
+        .branch(
+            case![Command::PlayScissors].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    playscissors_command(bot, msg, &db_pool).await
+                }
+            )
+        ) 
         //
         //DevCommands
         //

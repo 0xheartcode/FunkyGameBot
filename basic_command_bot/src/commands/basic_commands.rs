@@ -13,11 +13,20 @@ use crate::commands::season::{
 use rusqlite::{params };
 
 
+use crate::commands::playing_commands::{
+    insert_player_hand_choice,
+    current_game_status_and_season_id,
+    check_player_in_game,
+     get_current_round_id
+};
+
+
 //
 //
 //TODO BasicCommands
 //
 //====================================================
+
 
 pub async fn help(bot: Bot, msg: Message, db_pool: Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
     if is_authorized_dev(&msg) {
@@ -89,23 +98,126 @@ pub async fn viewleaderboard_command(bot: Bot, msg: Message) -> Result<(), Box<d
     Ok(())
 }
 
-// TODO
-pub async fn playrock_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
-    bot.send_message(msg.chat.id, "Playing the rock hand 🪨.").await?;
+
+pub async fn playrock_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
+    // Check if there is an active season in the "round_ongoing" phase and get the season_id
+    let game_status_and_season_id = current_game_status_and_season_id(db_pool).await?;
+    if let Some((game_status, season_id)) = game_status_and_season_id {
+        if game_status != "round_ongoing" {
+            bot.send_message(msg.chat.id, "There is no round currently ongoing.").await?;
+            return Ok(());
+        }
+
+        // Extract player details
+        let player_id = msg.from().expect("Message has no sender").id.0;
+
+        // Check if the player is in the current game
+        let player_in_game = check_player_in_game(db_pool, player_id.try_into().unwrap(), season_id).await?;
+        if !player_in_game {
+            bot.send_message(msg.chat.id, "You are not part of the current game.").await?;
+            return Ok(());
+        }
+
+        // Get the current round ID
+        let round_id = get_current_round_id(db_pool, season_id).await?;
+        if let Some(current_round_id) = round_id {
+            // Insert the player's choice into the RoundDetailsTable
+            let success = insert_player_hand_choice(db_pool, current_round_id, player_id.try_into().unwrap(), "rock").await?;
+            if success {
+                bot.send_message(msg.chat.id, "Playing the rock hand 🪨.").await?;
+            } else {
+                bot.send_message(msg.chat.id, "You have already played this round.").await?;
+            }
+        } else {
+            bot.send_message(msg.chat.id, "No active round found.").await?;
+        }
+    } else {
+        bot.send_message(msg.chat.id, "No active season found.").await?;
+    }
+
     Ok(())
 }
 
-// TODO
-pub async fn playpaper_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
-    bot.send_message(msg.chat.id, "Playing the paper hand 📜.").await?;
+
+pub async fn playpaper_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
+    // Check if there is an active season in the "round_ongoing" phase and get the season_id
+    let game_status_and_season_id = current_game_status_and_season_id(db_pool).await?;
+    if let Some((game_status, season_id)) = game_status_and_season_id {
+        if game_status != "round_ongoing" {
+            bot.send_message(msg.chat.id, "There is no round currently ongoing.").await?;
+            return Ok(());
+        }
+
+        // Extract player details
+        let player_id = msg.from().expect("Message has no sender").id.0;
+
+        // Check if the player is in the current game
+        let player_in_game = check_player_in_game(db_pool, player_id.try_into().unwrap(), season_id).await?;
+        if !player_in_game {
+            bot.send_message(msg.chat.id, "You are not part of the current game.").await?;
+            return Ok(());
+        }
+
+        // Get the current round ID
+        let round_id = get_current_round_id(db_pool, season_id).await?;
+        if let Some(current_round_id) = round_id {
+            // Insert the player's choice into the RoundDetailsTable
+            let success = insert_player_hand_choice(db_pool, current_round_id, player_id.try_into().unwrap(), "paper").await?;
+            if success {
+                bot.send_message(msg.chat.id, "Playing the paper hand 📜.").await?;
+            } else {
+                bot.send_message(msg.chat.id, "You have already played this round.").await?;
+            }
+        } else {
+            bot.send_message(msg.chat.id, "No active round found.").await?;
+        }
+    } else {
+        bot.send_message(msg.chat.id, "No active season found.").await?;
+    }
+
     Ok(())
 }
 
-// TODO
-pub async fn playscissors_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
-    bot.send_message(msg.chat.id, "Playing the scissors hand ✂.").await?;
+
+pub async fn playscissors_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
+    // Check if there is an active season in the "round_ongoing" phase and get the season_id
+    let game_status_and_season_id = current_game_status_and_season_id(db_pool).await?;
+    if let Some((game_status, season_id)) = game_status_and_season_id {
+        if game_status != "round_ongoing" {
+            bot.send_message(msg.chat.id, "There is no round currently ongoing.").await?;
+            return Ok(());
+        }
+
+        // Extract player details
+        let player_id = msg.from().expect("Message has no sender").id.0;
+
+        // Check if the player is in the current game
+        let player_in_game = check_player_in_game(db_pool, player_id.try_into().unwrap(), season_id).await?;
+        if !player_in_game {
+            bot.send_message(msg.chat.id, "You are not part of the current game.").await?;
+            return Ok(());
+        }
+
+        // Get the current round ID
+        let round_id = get_current_round_id(db_pool, season_id).await?;
+        if let Some(current_round_id) = round_id {
+            // Insert the player's choice into the RoundDetailsTable
+            let success = insert_player_hand_choice(db_pool, current_round_id, player_id.try_into().unwrap(), "scissors").await?;
+            if success {
+                bot.send_message(msg.chat.id, "Playing the scissors hand ✂.").await?;
+            } else {
+                bot.send_message(msg.chat.id, "You have already played this round.").await?;
+            }
+        } else {
+            bot.send_message(msg.chat.id, "No active round found.").await?;
+        }
+    } else {
+        bot.send_message(msg.chat.id, "No active season found.").await?;
+    }
+
     Ok(())
 }
+
 
 pub async fn status_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
 
