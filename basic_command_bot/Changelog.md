@@ -1,3 +1,27 @@
+## January 28 Updates
+
+### Command Implementations and Modifications
+
+- `signup_command`: Implemented to allow players to sign up for the current game season. The command checks if the game is in the "start_signup" phase and registers the player in the `MasterCandidateTable` with 'pending' status.
+
+- `view_signuplist_command`: Enhanced to view the list of players who have signed up for the current season. The command now supports filtering by player status ('pending', 'accepted', 'refused', or 'all').
+
+- `refuseplayer_command`: Updated to set a player's status to 'refused' in the `MasterCandidateTable`. It checks if the player is pending in the current season before updating.
+
+- `approveplayer_command`: Adapted to not only update the player's status to 'accepted' in the `MasterCandidateTable`, but also to add the player to the `PlayerDetailsTable`. Now returns a message to the accepted player.
+
+- `playrock_command`, `playpaper_command`, `playscissors_command`: Created to allow players to play their respective hands in the ongoing round. These commands check if the player is part of the current game and inserts their choice into the `RoundDetailsTable`.
+
+### Database Function Enhancements
+
+- `get_signup_list_for_season`: Adjusted to filter the signup list based on player status. Added functionality to handle different status filters including 'all'.
+
+- `insert_player_hand_choice`: Created as a database utility function to insert a player's game choice into `RoundDetailsTable`. Returns a boolean indicating the success of the operation.
+
+### Database Reset
+
+- Performed a reset of the database to ensure a fresh start with the newly implemented functionalities and schema adjustments.
+
 ## January 26 Updates
 
 ### Function Implementations and Bug Fixes

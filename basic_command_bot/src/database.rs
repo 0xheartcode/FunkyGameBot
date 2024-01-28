@@ -23,7 +23,7 @@ pub fn init_db_pool() -> DbPool {
         [],
     ).expect("Failed to create table");
 
-    conn.execute("DROP TABLE IF EXISTS administrators", []).expect("Failed to drop table"); // Reset switch
+    //conn.execute("DROP TABLE IF EXISTS administrators", []).expect("Failed to drop table"); // Reset switch
     conn.execute(
         "CREATE TABLE IF NOT EXISTS administrators (
             username TEXT PRIMARY KEY
@@ -47,7 +47,7 @@ pub fn init_db_pool() -> DbPool {
             ).expect("Failed to insert default administrator");
         }
     }
-    conn.execute("DROP TABLE IF EXISTS seasons", []).expect("Failed to drop table"); // Reset switch
+    //conn.execute("DROP TABLE IF EXISTS seasons", []).expect("Failed to drop table"); // Reset switch
     conn.execute(
     "CREATE TABLE IF NOT EXISTS seasons (
         id INTEGER PRIMARY KEY,
@@ -61,7 +61,7 @@ pub fn init_db_pool() -> DbPool {
         [],
     ).expect("Failed to create modified seasons table");
 
-    conn.execute("DROP TABLE IF EXISTS channel_settings", []).expect("Failed to drop table"); // Reset switch
+    //conn.execute("DROP TABLE IF EXISTS channel_settings", []).expect("Failed to drop table"); // Reset switch
     conn.execute(
         "CREATE TABLE IF NOT EXISTS channel_settings (
             id INTEGER PRIMARY KEY,
@@ -78,7 +78,7 @@ pub fn init_db_pool() -> DbPool {
     ).expect("Failed to insert initial row into channel_settings");
     
     // Create the MasterRoundTable
-    conn.execute("DROP TABLE IF EXISTS MasterRoundTable", []).expect("Failed to drop MasterRoundTable"); // Reset switch
+    //conn.execute("DROP TABLE IF EXISTS MasterRoundTable", []).expect("Failed to drop MasterRoundTable"); // Reset switch
     conn.execute(
         "CREATE TABLE IF NOT EXISTS MasterRoundTable (
             id INTEGER PRIMARY KEY,
@@ -92,7 +92,7 @@ pub fn init_db_pool() -> DbPool {
     ).expect("Failed to create MasterRoundTable");
 
     // Create the RoundDetailsTable
-    conn.execute("DROP TABLE IF EXISTS RoundDetailsTable", []).expect("Failed to drop RoundDetailsTable"); // Reset switch
+    //conn.execute("DROP TABLE IF EXISTS RoundDetailsTable", []).expect("Failed to drop RoundDetailsTable"); // Reset switch
     conn.execute(
         "CREATE TABLE IF NOT EXISTS RoundDetailsTable (
             id INTEGER PRIMARY KEY,
