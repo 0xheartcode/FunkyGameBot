@@ -10,12 +10,20 @@ pub enum Command {
     //
     #[command(description = "Display this text. 🟢")]
     Help,
-    #[command(description = "Register for a new game season. 🟠")]
+    #[command(description = "Register for a new game season. 🟢")]
     Signup,
     #[command(description = "Get the current version. 🟢")]
     Version,
-    #[command(description = "Information regarding the current season 🟠")]
+    #[command(description = "Information regarding the current season 🟢
+
+        ")]
     Status,
+    #[command(description = "Play the rock hand. 🟠")]
+    PlayRock,
+    #[command(description = "Play the paper hand. 🟠")]
+    PlayPaper,
+    #[command(description = "Play the scissors hand. 🟠")]
+    PlayScissors,
     //
     //DevCommands
     //
@@ -58,9 +66,9 @@ pub enum Command {
     #[command(description = "off")]
     StopRound,    
     #[command(description = "off")]
-    ApprovePlayer,
+    ApprovePlayer(String),
     #[command(description = "off")]
-    RefusePlayer,
+    RefusePlayer(String),
     #[command(description = "off")]
     ViewSignupList,
     #[command(description = "off")]
@@ -83,6 +91,10 @@ pub enum Command {
     ResetGroupBroadcast,
     #[command(description = "off")]
     ReadChangelog,
+    #[command(description = "off")]
+    ResetCandidateTable,
+    #[command(description = "off")]
+    ResetPlayerTable,
 }
 
 #[derive(BotCommands, Clone)]
@@ -122,20 +134,20 @@ pub enum AdminCommand {
 
         ")]
     StopRound,    
-    #[command(description = "View the list of players who signed up. 🟠")]
+    #[command(description = "View the list of players who signed up. 🟢")]
     ViewSignupList,
-    #[command(description = "View the list of approved players. 🟠")]
+    #[command(description = "View the list of approved players. 🟢")]
     ViewApprovedList,
-    #[command(description = "View the list of refused players. 🟠
+    #[command(description = "View the list of refused players. 🟢
 
         ")]
     ViewRefusedList,
-    #[command(description = "Approve a player's signup request. 🟠")]
-    ApprovePlayer,
-    #[command(description = "Refuse a player's signup request. 🟠
+    #[command(description = "Approve a player's signup request. 🟢")]
+    ApprovePlayer(String),
+    #[command(description = "Refuse a player's signup request. 🟢
 
         ")]
-    RefusePlayer,
+    RefusePlayer(String),
     #[command(description = "Set the channel ID for broadcasting messages. 🟢")]
     SetBroadcastChannel,
     #[command(description = "Set the group channel ID for group-related messages. 🟢")]
@@ -163,5 +175,9 @@ pub enum DevCommand {
     Writesql(String),
     #[command(description = "Read from sqllite db.")]
     Readsql,
+    #[command(description = "Clear the players table.")]
+    ResetCandidateTable,
+    #[command(description = "Clear the candidates table.")]
+    ResetPlayerTable,
 }
 

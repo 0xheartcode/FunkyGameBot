@@ -44,10 +44,10 @@ pub async fn current_active_season_id(pool: &DbPool) -> Result<Option<i32>, Rusq
 }
 
 // Function to get details of the current active season
-pub async fn current_active_season_details(pool: &DbPool) -> Result<Option<(String, String, i32, String)>, RusqliteError> {
+pub async fn current_active_season_details(pool: &DbPool) -> Result<Option<(i32, String, String, i32, String)>, RusqliteError> {
     let conn = pool.get().expect("Failed to get connection from pool");
     let query = "
-        SELECT name, start_date, max_players, status
+        SELECT id, name, start_date, max_players, status
         FROM seasons
         WHERE is_active = true
         LIMIT 1";
@@ -56,11 +56,12 @@ pub async fn current_active_season_details(pool: &DbPool) -> Result<Option<(Stri
     let mut rows = stmt.query([])?;
 
     if let Some(row) = rows.next()? {
-        let name: String = row.get(0)?;
-        let start_date: String = row.get(1)?;
-        let max_players: i32 = row.get(2)?;
-        let status: String = row.get(3)?;
-        Ok(Some((name, start_date, max_players, status)))
+        let season_id: i32 = row.get(0)?;
+        let name: String = row.get(1)?;
+        let start_date: String = row.get(2)?;
+        let max_players: i32 = row.get(3)?;
+        let status: String = row.get(4)?;
+        Ok(Some((season_id, name, start_date, max_players, status)))
     } else {
         Ok(None)
     }
@@ -197,3 +198,6 @@ pub async fn end_current_round(pool: &DbPool, current_active_season_id_variable:
     }
         
 }
+
+
+

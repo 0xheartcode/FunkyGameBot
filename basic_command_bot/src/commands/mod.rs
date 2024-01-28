@@ -7,5 +7,6 @@ pub mod dev_commands;
 pub mod season;
 pub mod changelogread;
 pub mod grp_broadcast_commands;
+pub mod registration_commands;
 // Add other modules if they exist
 

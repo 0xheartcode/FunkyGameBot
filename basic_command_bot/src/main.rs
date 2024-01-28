@@ -25,6 +25,9 @@ use commands::basic_commands::{
     version_command,
     viewleaderboard_command,
     status_command,
+    playrock_command,
+    playpaper_command,
+    playscissors_command,
 };
 
 use commands::admin_commands::{
@@ -40,6 +43,9 @@ use commands::admin_commands::{
     stopgamingphase_command,
     start_round_command,
     stop_round_command,
+};
+
+use commands::registration_commands::{
     approveplayer_command,
     refuseplayer_command,
     view_signuplist_command,
@@ -52,6 +58,8 @@ use commands::dev_commands::{
     username_and_age_command, 
     write_sql_command, 
     read_sql_command,
+    admin_reset_players_command,
+    admin_reset_candidate_command,
 };
 
 use commands::grp_broadcast_commands::{
@@ -98,10 +106,25 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
                 }
             )
         )
-        .branch(case![Command::Signup].endpoint(signup_command))
+        .branch(
+            case![Command::Signup].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    signup_command(bot, msg, &db_pool).await
+                }
+            )
+        )
         .branch(case![Command::Version].endpoint(version_command))
         .branch(case![Command::ViewLeaderboard].endpoint(viewleaderboard_command))
-        .branch(case![Command::Status].endpoint(status_command))
+        .branch(
+            case![Command::Status].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    status_command(bot, msg, &db_pool).await
+                }
+            )
+        ) 
+        .branch(case![Command::PlayRock].endpoint(playrock_command))
+        .branch(case![Command::PlayPaper].endpoint(playpaper_command))
+        .branch(case![Command::PlayScissors].endpoint(playscissors_command))
         //
         //DevCommands
         //
@@ -114,6 +137,14 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
     .branch(dptree::case![Command::Readsql].endpoint(
             |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
                 read_sql_command(bot, msg, db_pool).await
+            }))
+    .branch(dptree::case![Command::ResetPlayerTable].endpoint(
+            |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                admin_reset_players_command(bot, msg, db_pool).await
+            }))
+    .branch(dptree::case![Command::ResetCandidateTable].endpoint(
+            |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                admin_reset_candidate_command(bot, msg, db_pool).await
             }))
     //
     //AdminCommands
@@ -182,16 +213,16 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
             )
         )
         .branch(
-            case![Command::ApprovePlayer].endpoint(
-                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
-                    approveplayer_command(bot, msg, &db_pool).await
+            case![Command::ApprovePlayer(username)].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>, username: String| async move {
+                    approveplayer_command(bot, msg, &db_pool, username).await
                 }
             )
         )
         .branch(
-            case![Command::RefusePlayer].endpoint(
-                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
-                    refuseplayer_command(bot, msg, &db_pool).await
+            case![Command::RefusePlayer(username)].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>, username: String| async move {
+                    refuseplayer_command(bot, msg, &db_pool, username).await
                 }
             )
         )
@@ -297,8 +328,7 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
 // When you don't receive a message that is a command (starts with /)
 async fn handle_invalid_text_message(bot: Bot, msg: Message) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     if let Some(username) = msg.from().and_then(|user| user.username.clone()) {
-        log::info!("From: {} Received an invalid text message.", username);
-        log::info!("ChatId: {}, Date {}\n Content: {}", msg.chat.id, msg.date, msg.text().unwrap_or_default());
+        log::info!("ChatId: {}, Date {} \nFrom: {} Received an invalid text message. \nContent: {}", msg.chat.id, msg.date, username, msg.text().unwrap_or_default());
         //log::info!("{:?}",msg);
     }
     bot.send_message(msg.chat.id, "Received your message, this is not a valid command. Try /help.").await?;

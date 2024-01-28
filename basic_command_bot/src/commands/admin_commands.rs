@@ -162,7 +162,7 @@ pub async fn stop_new_season_command(bot: Bot, msg: Message, db_pool: &Arc<DbPoo
     }
     // Check if there is an active season
     match current_active_season_details(db_pool).await {
-        Ok(Some((season_name, _, _, _))) => {
+        Ok(Some((_,season_name, _, _, _))) => {
             // Stop the active season
             match stop_current_season(db_pool).await {
                 Ok(_) => {
@@ -197,7 +197,7 @@ pub async fn current_season_status_command(bot: Bot, msg: Message, db_pool: &Arc
 
     // Check if there is an active season
     match current_active_season_details(db_pool).await {
-        Ok(Some((name, start_date, max_players, status))) => {
+        Ok(Some((_, name, start_date, max_players, status))) => {
             let message = format!(
                 "Current active season: '{}'\nStarted on: {}\nMax players: {}\nStatus: {}",
                 name, start_date, max_players, status
@@ -226,7 +226,7 @@ pub async fn startsignupphase_command(bot: Bot, msg: Message, db_pool: &Arc<DbPo
     // Attempt to start the signup phase
     // Check the current season's status
     match current_active_season_details(db_pool).await {
-        Ok(Some((name, _, _, status))) => {
+        Ok(Some((_, name, _, _, status))) => {
             match status.as_str() {
                 "start_signup" => {
                     bot.send_message(msg.chat.id, "Signup has already started.").await?;
@@ -272,7 +272,7 @@ pub async fn stopsignupphase_command(bot: Bot, msg: Message, db_pool: &Arc<DbPoo
 
     // Check the current season's status
     match current_active_season_details(db_pool).await {
-        Ok(Some((name, _, _, status))) => {
+        Ok(Some((_, name, _, _, status))) => {
             match status.as_str() {
                 "stopped_signup" => {
                     bot.send_message(msg.chat.id, "Signup has already stopped!").await?;
@@ -318,7 +318,7 @@ pub async fn startgamingphase_command(bot: Bot, msg: Message, db_pool: &Arc<DbPo
     }
     // Check the current season's status
     match current_active_season_details(db_pool).await {
-        Ok(Some((name, _, _, status))) => {
+        Ok(Some((_, name, _, _, status))) => {
             match status.as_str() {
                 "start_gaming" => {
                     bot.send_message(msg.chat.id, "The game has already started!").await?;
@@ -363,7 +363,7 @@ pub async fn stopgamingphase_command(bot: Bot, msg: Message, db_pool: &Arc<DbPoo
     }
     // Check the current season's status
     match current_active_season_details(db_pool).await {
-        Ok(Some((_name, _, _, status))) => {
+        Ok(Some((_, _, _, _, status))) => {
             match status.as_str() {
                 "stopped_gaming" => {
                     bot.send_message(msg.chat.id, "The game has already started!").await?;
@@ -412,7 +412,7 @@ pub async fn start_round_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) 
 
     // Check the current season's status
     let season_details = current_active_season_details(db_pool).await?;
-    if let Some((_, _, _, status)) = season_details {
+    if let Some((_, _, _, _, status)) = season_details {
         if status != "start_gaming" {
             bot.send_message(msg.chat.id, "There is no active season in the 'start_gaming' phase.").await?;
             return Ok(());
@@ -450,7 +450,7 @@ pub async fn stop_round_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -
 
     // Check the current season's status
     let season_details = current_active_season_details(db_pool).await?;
-    if season_details.is_none() || season_details.unwrap().3 != "round_ongoing" {
+    if season_details.is_none() || season_details.unwrap().4 != "round_ongoing" {
         bot.send_message(msg.chat.id, "There is no active season in the 'round_ongoing' phase.").await?;
         return Ok(());
     }
@@ -470,48 +470,4 @@ pub async fn stop_round_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -
 }
 
 
-// TODO GOAL D
-
-
-pub async fn approveplayer_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
-        if !is_authorized_sender(&msg, db_pool) {
-        return Ok(());  // Early return if the sender is not authorized
-    }
-    bot.send_message(msg.chat.id, "Player has been successfully approved for participation.").await?;
-    Ok(())
-}
-
-pub async fn refuseplayer_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
-        if !is_authorized_sender(&msg, db_pool) {
-        return Ok(());  // Early return if the sender is not authorized
-    }
-    bot.send_message(msg.chat.id, "Player's request to participate has been refused.").await?;
-    Ok(())
-}
-
-// TODO E
-//
-pub async fn view_signuplist_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
-        if !is_authorized_sender(&msg, db_pool) {
-        return Ok(());  // Early return if the sender is not authorized
-    }
-    bot.send_message(msg.chat.id, "Here's the list of players who have signed up: ...").await?;
-    Ok(())
-}
-
-pub async fn view_approved_list_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
-        if !is_authorized_sender(&msg, db_pool) {
-        return Ok(());  // Early return if the sender is not authorized
-    }
-    bot.send_message(msg.chat.id, "Here's the list of approved players: ...").await?;
-    Ok(())
-}
-
-pub async fn viewrefusedlist_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
-        if !is_authorized_sender(&msg, db_pool) {
-        return Ok(());  // Early return if the sender is not authorized
-    }
-    bot.send_message(msg.chat.id, "Here's the list of players whose requests were refused: ...").await?;
-    Ok(())
-}
 
