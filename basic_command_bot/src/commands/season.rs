@@ -199,5 +199,42 @@ pub async fn end_current_round(pool: &DbPool, current_active_season_id_variable:
         
 }
 
+pub async fn play_empty_hands_for_players(db_pool: &DbPool, season_id: i32, round_id: i32) -> Result<Vec<i64>, RusqliteError> {
+    let conn = db_pool.get().expect("Failed to get DB connection");
 
+    // Get the list of player IDs who have not played in this round
+    let player_ids = get_players_without_moves(db_pool, season_id, round_id).await?;
+
+    // Insert an empty hand for each of these players
+    for &player_id in &player_ids {
+        conn.execute(
+            "INSERT INTO RoundDetailsTable (round_id, player_id, player_hand, timestamp) VALUES (?1, ?2, '', CURRENT_TIMESTAMP)",
+            params![round_id, player_id],
+        )?;
+    }
+
+    Ok(player_ids)
+}
+
+
+
+pub async fn get_players_without_moves(db_pool: &DbPool, season_id: i32, round_id: i32) -> Result<Vec<i64>, RusqliteError> {
+    let conn = db_pool.get().expect("Failed to get DB connection");
+
+    let mut stmt = conn.prepare(
+        "SELECT pd.player_id
+         FROM PlayerDetailsTable pd
+         LEFT JOIN RoundDetailsTable rd ON pd.player_id = rd.player_id AND rd.round_id = ?2
+         WHERE pd.season_id = ?1 AND rd.player_id IS NULL",
+    )?;
+
+    let rows = stmt.query_map(params![season_id, round_id], |row| row.get(0))?;
+
+    let mut player_ids = Vec::new();
+    for row in rows {
+        player_ids.push(row?);
+    }
+
+    Ok(player_ids)
+}
 

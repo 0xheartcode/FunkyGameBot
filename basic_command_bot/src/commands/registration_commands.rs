@@ -97,7 +97,7 @@ pub async fn update_player_status_to_accepted(db_pool: &DbPool, season_id: i32, 
 
         // Insert the accepted player into PlayerDetailsTable
         tx.execute(
-            "INSERT INTO PlayerDetailsTable (season_id, player_id, player_username) VALUES (?1, ?2, ?3)",
+            "INSERT INTO PlayerDetailsTable (season_id, player_id, player_username, score) VALUES (?1, ?2, ?3, 0)",
             params![season_id, player_id, player_username],
         )?;
 

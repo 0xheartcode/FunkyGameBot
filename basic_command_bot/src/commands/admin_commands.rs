@@ -28,7 +28,18 @@ use crate::commands::season::{
     get_next_round_number,
     start_new_round,
     end_current_round,
+    play_empty_hands_for_players,
 };
+
+use crate::commands::playing_commands::{
+     get_current_round_id,
+     get_player_hands,
+     random_match_players,
+     evaluate_matches,
+     update_player_score,
+     announce_results,
+};
+
 
 //
 //TODO AdminCommands
@@ -452,11 +463,57 @@ pub async fn stop_round_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -
 
     // Get the current active round's ID
     let current_season_id = current_active_season_id(db_pool).await?;
-    if let Some(round_id) = current_season_id {
+    if let Some(season_id) = current_season_id {
+        
+        // Get the current round ID
+        let current_round_id = get_current_round_id(db_pool, season_id)
+            .await?
+            .expect("No current round ID found");
+        
+        // Handle players who haven't played
+        let players_without_moves = play_empty_hands_for_players(db_pool, season_id, current_round_id).await?;
+
+        // Notify players who haven't played
+        for player_id in players_without_moves {
+            // Here, send a message to each player. You'll need to convert `player_id` to a ChatId or UserId that Bot can use
+            let chat_id = ChatId(player_id as i64); // Assuming player_id can be directly used as chat_id
+            bot.send_message(chat_id, "Your hand was empty for this round.").await?;
+        }
+
+        // ====
+        // ==== GAME MAKING LOGIC HERE ===
+        // ====
+        // Step 1: Retrieve players and hands
+        let player_hands = get_player_hands(db_pool, current_round_id, season_id).await?;
+        println!("Player hands: {:?}",player_hands);
+
+        // Step 2: Randomly match players
+        let matched_pairs = random_match_players(player_hands).await;
+        println!("Matched pairs: {:?}",matched_pairs);
+
+        // Step 3: Evaluate matches
+        let match_results = evaluate_matches(db_pool, matched_pairs, current_round_id).await?;
+        println!("Match results: {:?}", match_results);
+
+        // Step 4: Update player scores and RoundDetailsTable
+        update_player_score(db_pool, match_results.clone(), season_id).await?;
+
+        // End of game-making logic
+
         // End the current round
-        end_current_round(db_pool, round_id).await?;
+        end_current_round(db_pool, season_id).await?;
 
         bot.send_message(msg.chat.id, "Round is over, everyone back to their corner!").await?;
+
+        // post game announcements:
+        // Generate announcement for match results
+        let announcement = announce_results(db_pool, match_results).await?;
+        if !announcement.is_empty() {
+            bot.send_message(msg.chat.id, &announcement).await?;
+        }
+
+
+
     } else {
         bot.send_message(msg.chat.id, "No active season ID found.").await?;
     }

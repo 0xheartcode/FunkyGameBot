@@ -97,8 +97,10 @@ pub fn init_db_pool() -> DbPool {
         "CREATE TABLE IF NOT EXISTS RoundDetailsTable (
             id INTEGER PRIMARY KEY,
             round_id INTEGER,
+            player_username TEXT,
             player_id INTEGER,
             player_hand TEXT,
+            opponent_username TEXT,
             opponent INTEGER,
             opponent_hand TEXT,
             timestamp TEXT,
@@ -109,6 +111,7 @@ pub fn init_db_pool() -> DbPool {
     ).expect("Failed to create RoundDetailsTable");
 
 
+    //conn.execute("DROP TABLE IF EXISTS PlayerDetailsTable", []).expect("Failed to drop PlayerDetailsTable"); // Reset switch
     // Create the PlayerDetailsTable
     conn.execute(
         "CREATE TABLE IF NOT EXISTS PlayerDetailsTable (
@@ -123,6 +126,7 @@ pub fn init_db_pool() -> DbPool {
         [],
     ).expect("Failed to create PlayerDetailsTable");
 
+    //conn.execute("DROP TABLE IF EXISTS MasterCandidateTable", []).expect("Failed to drop MasterCandidateTable"); // Reset switch
     // Create the MasterCandidateTable
     conn.execute(
         "CREATE TABLE IF NOT EXISTS MasterCandidateTable (
