@@ -5,7 +5,7 @@ use teloxide::{
     prelude::*,
 };
 
-use teloxide::adaptors::throttle::Limits;
+//use teloxide::adaptors::throttle::Limits;
 
 //use dotenv::dotenv;
 
@@ -85,7 +85,8 @@ async fn main() {
     log::info!("Starting timestamp: {}...", now.format("%Y-%m-%d %H:%M:%S %:z"));
     let db_pool = Arc::new(init_db_pool());     
     let bot = Bot::from_env()
-        .throttle(Limits::default());
+        //.throttle(Limits::default())
+        ;
 
     Dispatcher::builder(bot, schema())
         .dependencies(dptree::deps![db_pool])
