@@ -8,12 +8,22 @@ pub enum Command {
     //
     //BasicCommands
     //
-    #[command(description = "Display this text.")]
+    #[command(description = "Display this text. 🟢")]
     Help,
-    #[command(description = "Register for a new game season.")]
+    #[command(description = "Register for a new game season. 🟢")]
     Signup,
-    #[command(description = "Get the current version.")]
+    #[command(description = "Get the current version. 🟢")]
     Version,
+    #[command(description = "Information regarding the current season 🟢
+
+        ")]
+    Status,
+    #[command(description = "Play the rock hand. 🟢")]
+    PlayRock,
+    #[command(description = "Play the paper hand. 🟢")]
+    PlayPaper,
+    #[command(description = "Play the scissors hand. 🟢")]
+    PlayScissors,
     //
     //DevCommands
     //
@@ -38,9 +48,11 @@ pub enum Command {
     #[command(description = "off")]
     ListAdmins,
     #[command(description = "off")]
-    StartNewSeason,
+    StartNewSeason(String),
     #[command(description = "off")]
     StopNewSeason,
+    #[command(description = "off")]
+    CurrentSeasonStatus,
     #[command(description = "off")]
     StartSignupPhase,
     #[command(description = "off")]
@@ -50,61 +62,106 @@ pub enum Command {
     #[command(description = "off")]
     StopGamingPhase,
     #[command(description = "off")]
-    ApprovePlayer,
+    StartRound,
     #[command(description = "off")]
-    RefusePlayer,
+    StopRound,    
+    #[command(description = "off")]
+    ApprovePlayer(String),
+    #[command(description = "off")]
+    RefusePlayer(String),
     #[command(description = "off")]
     ViewSignupList,
     #[command(description = "off")]
     ViewApprovedList,
     #[command(description = "off")]
     ViewRefusedList,
-    #[command(description = "off")]
+    #[command(description = "View the current leaderboard.")]
     ViewLeaderboard,
+    #[command(description = "off")]
+    SetBroadcastChannel(String),
+    #[command(description = "off")]
+    SetGroupChannel(String),
+    #[command(description = "off")]
+    MsgBroadcastChannel(String),
+    #[command(description = "off")]
+    MsgGroup(String),
+    #[command(description = "off")]
+    GetGroupBroadcastId,
+    #[command(description = "off")]
+    ResetGroupBroadcast,
+    #[command(description = "off")]
+    ReadChangelog,
+    #[command(description = "off")]
+    ResetCandidateTable,
+    #[command(description = "off")]
+    ResetPlayerTable,
 }
 
 #[derive(BotCommands, Clone)]
 #[command(rename_rule = "lowercase", description = "These 🌟 Admin 🌟 commands are supported:")]
 pub enum AdminCommand {
-    #[command(description = "add a user to the admin list.")]
+    #[command(description = "add a user to the admin list. 🟢")]
     AddAdmin(String),
-    #[command(description = "remove a user from the admin list.")]
+    #[command(description = "remove a user from the admin list. 🟢")]
     RemoveAdmin(String),
-    #[command(description = "list admin users.
+    #[command(description = "list admin users. 🟢 
 
         ")]
     ListAdmins,
-    #[command(description = "Start a new season for the rock-paper-scissors game.")]
-    StartNewSeason,
-    #[command(description = "Stop the current season of the rock-paper-scissors game.")]
+    #[command(description = "Start a new season for the rock-paper-scissors game with a given name and max number of players. 🟢 ")]
+    StartNewSeason(String),
+    #[command(description = "Stop the current season of the rock-paper-scissors game. 🟢")]
     StopNewSeason,
-    #[command(description = "Begin the signup phase for players.")]
+    #[command(description = "Information regarding the current season. 🟢 
+
+        ")]
+    CurrentSeasonStatus,
+    #[command(description = "Begin the signup phase for players. 🟢")]
     StartSignupPhase,
-    #[command(description = "End the signup phase for players.")]
+    #[command(description = "End the signup phase for players. 🟢")]
     StopSignupPhase,
-    #[command(description = "Start the gaming phase.")]
+    #[command(description = "Start the gaming phase. 🟢")]
     StartGamingPhase,
 
-    #[command(description = "Stop the gaming phase.
+    #[command(description = "Stop the gaming phase. 🟢
 
         ")]
     StopGamingPhase,
-    #[command(description = "View the list of players who signed up.")]
+    #[command(description = "The core of the game, start a round.🟢")]
+    StartRound,
+
+    #[command(description = "Stop a game round. 🟢
+
+        ")]
+    StopRound,    
+    #[command(description = "View the list of players who signed up. 🟢")]
     ViewSignupList,
-    #[command(description = "View the list of approved players.")]
+    #[command(description = "View the list of approved players. 🟢")]
     ViewApprovedList,
-    #[command(description = "View the list of refused players.
+    #[command(description = "View the list of refused players. 🟢
 
         ")]
     ViewRefusedList,
-    #[command(description = "Approve a player's signup request.")]
-    ApprovePlayer,
-    #[command(description = "Refuse a player's signup request.
+    #[command(description = "Approve a player's signup request. 🟢")]
+    ApprovePlayer(String),
+    #[command(description = "Refuse a player's signup request. 🟢
 
         ")]
-    RefusePlayer,
-    #[command(description = "View the current leaderboard.")]
-    ViewLeaderboard,
+    RefusePlayer(String),
+    #[command(description = "Set the channel ID for broadcasting messages. 🟢")]
+    SetBroadcastChannel,
+    #[command(description = "Set the group channel ID for group-related messages. 🟢")]
+    SetGroupChannel,
+    #[command(description = "Send a message to the broadcast channel. 🟢")]
+    MsgBroadcastChannel,
+    #[command(description = "Send a message to the group channel. 🟢")]
+    MsgGroup,
+    #[command(description = "Retrieve the current ID of the group and broadcast channel. 🟢")]
+    GetGroupBroadcastId,
+    #[command(description = "Reset the group and broadcast channel settings.  🟢")]
+    ResetGroupBroadcast,
+    #[command(description = "Read the changelog. 🟢")]
+    ReadChangelog,
 }
 
 #[derive(BotCommands, Clone)]
@@ -118,5 +175,9 @@ pub enum DevCommand {
     Writesql(String),
     #[command(description = "Read from sqllite db.")]
     Readsql,
+    #[command(description = "Clear the players table.")]
+    ResetCandidateTable,
+    #[command(description = "Clear the candidates table.")]
+    ResetPlayerTable,
 }
 

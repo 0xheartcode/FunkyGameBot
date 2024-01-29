@@ -2,9 +2,9 @@
 
 use teloxide::{prelude::*};
 use std::{error::Error};
-
 use crate::admin::{is_authorized_dev};
 use crate::database::{DbPool, write_to_db, read_from_db};
+use rusqlite::{ Error as RusqliteError};
 
 use std::sync::Arc;
 
@@ -84,5 +84,42 @@ pub async fn read_sql_command(bot: Bot, msg: Message, db_pool: Arc<DbPool>) -> R
         },
     }
     Ok(())
+}
+
+
+pub async fn admin_reset_players_command(bot: Bot, msg: Message, db_pool: Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
+    if !is_authorized_dev(&msg) { return Ok(());} //check is dev
+    // Call the function to clear or drop the PlayerDetailsTable
+    clear_player_details_table(&db_pool).await?;
+    // or use drop_player_details_table(db_pool).await?; to drop the table
+
+    bot.send_message(msg.chat.id, "Player details table has been reset.").await?;
+
+    Ok(())
+}
+
+pub async fn admin_reset_candidate_command(bot: Bot, msg: Message, db_pool: Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
+    if !is_authorized_dev(&msg) { return Ok(());} //check is dev
+
+    // Call the function to clear or drop the PlayerDetailsTable
+    clear_master_candidate_table(&db_pool).await?;
+    // or use drop_player_details_table(db_pool).await?; to drop the table
+
+    bot.send_message(msg.chat.id, "Master candidate table has been reset.").await?;
+
+    Ok(())
+}
+
+
+pub async fn clear_master_candidate_table(db_pool: &DbPool) -> Result<(), RusqliteError> {
+    let conn = db_pool.get().expect("Failed to get DB connection");
+    conn.execute("DELETE FROM MasterCandidateTable", [])?;
+    Ok(()) 
+}
+
+pub async fn clear_player_details_table(db_pool: &DbPool) -> Result<(), RusqliteError> {
+    let conn = db_pool.get().expect("Failed to get DB connection");
+    conn.execute("DELETE FROM PlayerDetailsTable", [])?;
+    Ok(()) 
 }
 
