@@ -47,7 +47,7 @@ pub fn init_db_pool() -> DbPool {
             ).expect("Failed to insert default administrator");
         }
     }
-    //conn.execute("DROP TABLE IF EXISTS seasons", []).expect("Failed to drop table"); // Reset switch
+    conn.execute("DROP TABLE IF EXISTS seasons", []).expect("Failed to drop table"); // Reset switch
     conn.execute(
     "CREATE TABLE IF NOT EXISTS seasons (
         id INTEGER PRIMARY KEY,
@@ -78,7 +78,7 @@ pub fn init_db_pool() -> DbPool {
     ).expect("Failed to insert initial row into channel_settings");
     
     // Create the MasterRoundTable
-    //conn.execute("DROP TABLE IF EXISTS MasterRoundTable", []).expect("Failed to drop MasterRoundTable"); // Reset switch
+    conn.execute("DROP TABLE IF EXISTS MasterRoundTable", []).expect("Failed to drop MasterRoundTable"); // Reset switch
     conn.execute(
         "CREATE TABLE IF NOT EXISTS MasterRoundTable (
             id INTEGER PRIMARY KEY,
@@ -92,7 +92,7 @@ pub fn init_db_pool() -> DbPool {
     ).expect("Failed to create MasterRoundTable");
 
     // Create the RoundDetailsTable
-    //conn.execute("DROP TABLE IF EXISTS RoundDetailsTable", []).expect("Failed to drop RoundDetailsTable"); // Reset switch
+    conn.execute("DROP TABLE IF EXISTS RoundDetailsTable", []).expect("Failed to drop RoundDetailsTable"); // Reset switch
     conn.execute(
         "CREATE TABLE IF NOT EXISTS RoundDetailsTable (
             id INTEGER PRIMARY KEY,
@@ -111,7 +111,7 @@ pub fn init_db_pool() -> DbPool {
     ).expect("Failed to create RoundDetailsTable");
 
 
-    //conn.execute("DROP TABLE IF EXISTS PlayerDetailsTable", []).expect("Failed to drop PlayerDetailsTable"); // Reset switch
+    conn.execute("DROP TABLE IF EXISTS PlayerDetailsTable", []).expect("Failed to drop PlayerDetailsTable"); // Reset switch
     // Create the PlayerDetailsTable
     conn.execute(
         "CREATE TABLE IF NOT EXISTS PlayerDetailsTable (
@@ -126,7 +126,7 @@ pub fn init_db_pool() -> DbPool {
         [],
     ).expect("Failed to create PlayerDetailsTable");
 
-    //conn.execute("DROP TABLE IF EXISTS MasterCandidateTable", []).expect("Failed to drop MasterCandidateTable"); // Reset switch
+    conn.execute("DROP TABLE IF EXISTS MasterCandidateTable", []).expect("Failed to drop MasterCandidateTable"); // Reset switch
     // Create the MasterCandidateTable
     conn.execute(
         "CREATE TABLE IF NOT EXISTS MasterCandidateTable (

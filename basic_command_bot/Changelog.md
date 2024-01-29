@@ -1,3 +1,25 @@
+## January 29 Updates
+
+## Updates and New Features
+
+- **Matchmaking Logic on Round Closure**: Implemented a feature for automatic matchmaking when a round is manually closed. Players are now randomly matched against each other.
+
+- **Leaderboard Display**: Added a function to display a leaderboard at the end of each game round.
+
+- **Auto-play for Inactive Players**: Developed a function that automatically plays empty hands for players who are part of the game but haven't played their hand.
+
+- **Player Matching Functionality**: Created a function to match players against each other, which is executed inside the `/stopround` function.
+
+- **Scoring System**: Integrated a scoring system where players earn points based on the outcome of their matches.
+
+- **Final Leaderboard Announcement**: Implemented a feature to display a special final leaderboard at the conclusion of a season.
+
+## Bug Fixes and Improvements
+
+- Fixed various bugs related to database interactions and command logic.
+- Improved the clarity and user-friendliness of bot messages and responses.
+- Streamlined the code for better performance and maintainability.
+
 ## January 28 Updates
 
 ### Command Implementations and Modifications

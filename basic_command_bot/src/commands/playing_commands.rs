@@ -266,3 +266,33 @@ fn hand_to_emoji(hand: &str) -> &str {
     }
 }
 
+// Fetch leaderboard data
+pub async fn fetch_leaderboard(db_pool: &DbPool, season_id: i32) -> Result<Vec<(String, i32)>, RusqliteError> {
+    let conn = db_pool.get().expect("Failed to get DB connection");
+    let mut stmt = conn.prepare(
+        "SELECT player_username, score FROM PlayerDetailsTable WHERE season_id = ?1 ORDER BY score DESC, player_username",
+    )?;
+    let leaderboard = stmt.query_map(params![season_id], |row| {
+        Ok((row.get(0)?, row.get(1)?))
+    })?
+    .collect::<Result<Vec<(String, i32)>, RusqliteError>>()?;
+
+    Ok(leaderboard)
+}
+
+// Prepare leaderboard string with medals
+pub async fn prepare_leaderboard_string(leaderboard: Vec<(String, i32)>) -> String {
+    let mut response = String::from("🏆 Leaderboard 🏆\n\n");
+    for (index, (username, score)) in leaderboard.iter().enumerate() {
+        let position = match index {
+            0 => "🥇",
+            1 => "🥈",
+            2 => "🥉",
+            _ => "",
+        };
+        response.push_str(&format!("{:<3} {:>2}. @{} - {:>3} points\n", position, index + 1, username, score));
+    }
+
+    response
+}
+

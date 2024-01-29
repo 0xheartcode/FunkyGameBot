@@ -40,6 +40,9 @@ use crate::commands::playing_commands::{
      announce_results,
 };
 
+use crate::commands::playing_commands::fetch_leaderboard;
+ use crate::commands::playing_commands::prepare_leaderboard_string;
+
 
 //
 //TODO AdminCommands
@@ -173,12 +176,27 @@ pub async fn stop_new_season_command(bot: Bot, msg: Message, db_pool: &Arc<DbPoo
     }
     // Check if there is an active season
     match current_active_season_details(db_pool).await {
-        Ok(Some((_,season_name, _, _, _))) => {
+        Ok(Some((season_id,season_name, _, _, _))) => {
             // Stop the active season
             match stop_current_season(db_pool).await {
                 Ok(_) => {
                     // Successfully stopped the season
                     bot.send_message(msg.chat.id, format!("The season '{}' has been successfully concluded.", season_name)).await?;
+
+                   // Fetch and display the final leaderboard
+                    match fetch_leaderboard(db_pool, season_id).await {
+                        Ok(leaderboard) => {
+                            let mut response = prepare_leaderboard_string(leaderboard).await;
+                            // Replace the first line with the final leaderboard title
+                            if let Some(end_of_first_line) = response.find('\n') {
+                                response.replace_range(..end_of_first_line, &format!("🏆 Final {} Leaderboard 🏆", season_name));
+                            }
+                            bot.send_message(msg.chat.id, &response).await?;
+                        },
+                        Err(_) => {
+                            bot.send_message(msg.chat.id, "Failed to fetch the final leaderboard.").await?;
+                        }
+                    }
                 }
                 Err(e) => {
                     // Error in stopping the season

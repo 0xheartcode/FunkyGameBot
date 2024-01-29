@@ -114,7 +114,13 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
             )
         )
         .branch(case![Command::Version].endpoint(version_command))
-        .branch(case![Command::ViewLeaderboard].endpoint(viewleaderboard_command))
+        .branch(
+            case![Command::ViewLeaderboard].endpoint(
+                |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {
+                    viewleaderboard_command(bot, msg, &db_pool).await
+                }
+            )
+        ) 
         .branch(
             case![Command::Status].endpoint(
                 |bot: Bot, msg: Message, db_pool: Arc<DbPool>| async move {

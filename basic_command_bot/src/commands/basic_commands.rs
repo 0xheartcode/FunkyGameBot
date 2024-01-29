@@ -9,6 +9,7 @@ use crate::database::{DbPool};
 
 use crate::commands::season::{
     current_active_season_details,
+    current_active_season_id,
 };
 use rusqlite::{params };
 
@@ -17,7 +18,9 @@ use crate::commands::playing_commands::{
     insert_player_hand_choice,
     current_game_status_and_season_id,
     check_player_in_game,
-     get_current_round_id
+    get_current_round_id,
+    fetch_leaderboard,
+    prepare_leaderboard_string,
 };
 
 
@@ -93,8 +96,26 @@ pub async fn version_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error
 
 
 // TODO
-pub async fn viewleaderboard_command(bot: Bot, msg: Message) -> Result<(), Box<dyn Error + Send + Sync>> {
-    bot.send_message(msg.chat.id, "Current leaderboard standings: ...").await?;
+pub async fn viewleaderboard_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>) -> Result<(), Box<dyn Error + Send + Sync>> {
+    let current_season_id = current_active_season_id(db_pool).await?;
+
+    // Check if a current season ID is present and fetch the leaderboard accordingly
+    match current_season_id {
+        Some(season_id) => {
+            match fetch_leaderboard(db_pool, season_id).await {
+                Ok(leaderboard) => {
+                    let response = prepare_leaderboard_string(leaderboard).await;
+                    bot.send_message(msg.chat.id, &response).await?;
+                },
+                Err(_) => {
+                    bot.send_message(msg.chat.id, "Failed to fetch the leaderboard.").await?;
+                }
+            }
+        },
+        None => {
+            bot.send_message(msg.chat.id, "Leaderboards only work during active games. Check the main channel for logs").await?;
+        }
+    }
     Ok(())
 }
 
