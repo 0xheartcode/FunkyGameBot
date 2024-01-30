@@ -2,7 +2,7 @@
 
 =======================================================
 # Funky Game BOT Specs
-
+ 
 ## Step 0
 The player wants to start a game (with the bot). 
 
