@@ -359,7 +359,7 @@ async fn handle_invalid_text_message(bot: Bot, msg: Message) -> Result<(), Box<d
         log::info!("ChatId: {}, Date {} \nFrom: {} Received an invalid text message. \nContent: {}", msg.chat.id, msg.date, username, msg.text().unwrap_or_default());
         //log::info!("{:?}",msg);
     }
-    bot.send_message(msg.chat.id, "Received your message, this is not a valid command. Try /help.").await?;
+    //bot.send_message(msg.chat.id, "Received your message, this is not a valid command. Try /help.").await?;
     Ok(())
 }
 

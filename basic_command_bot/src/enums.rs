@@ -8,21 +8,21 @@ pub enum Command {
     //
     //BasicCommands
     //
-    #[command(description = "Display this text. 🟢")]
+    #[command(description = "Display this text. ")]
     Help,
-    #[command(description = "Register for a new game season. 🟢")]
+    #[command(description = "Register for a new game season. ")]
     Signup,
-    #[command(description = "Get the current version. 🟢")]
+    #[command(description = "Get the current version. ")]
     Version,
-    #[command(description = "Information regarding the current season 🟢
+    #[command(description = "Information regarding the current season 
 
         ")]
     Status,
-    #[command(description = "Play the rock hand. 🟢")]
+    #[command(description = "Play the rock hand. ")]
     PlayRock,
-    #[command(description = "Play the paper hand. 🟢")]
+    #[command(description = "Play the paper hand. ")]
     PlayPaper,
-    #[command(description = "Play the scissors hand. 🟢")]
+    #[command(description = "Play the scissors hand. ")]
     PlayScissors,
     //
     //DevCommands
@@ -100,67 +100,67 @@ pub enum Command {
 #[derive(BotCommands, Clone)]
 #[command(rename_rule = "lowercase", description = "These 🌟 Admin 🌟 commands are supported:")]
 pub enum AdminCommand {
-    #[command(description = "add a user to the admin list. 🟢")]
+    #[command(description = "add a user to the admin list. ")]
     AddAdmin(String),
-    #[command(description = "remove a user from the admin list. 🟢")]
+    #[command(description = "remove a user from the admin list. ")]
     RemoveAdmin(String),
-    #[command(description = "list admin users. 🟢 
+    #[command(description = "list admin users.  
 
         ")]
     ListAdmins,
-    #[command(description = "Start a new season for the rock-paper-scissors game with a given name and max number of players. 🟢 ")]
+    #[command(description = "Start a new season for the rock-paper-scissors game with a given name and max number of players.  ")]
     StartNewSeason(String),
-    #[command(description = "Stop the current season of the rock-paper-scissors game. 🟢")]
+    #[command(description = "Stop the current season of the rock-paper-scissors game. ")]
     StopNewSeason,
-    #[command(description = "Information regarding the current season. 🟢 
+    #[command(description = "Information regarding the current season.  
 
         ")]
     CurrentSeasonStatus,
-    #[command(description = "Begin the signup phase for players. 🟢")]
+    #[command(description = "Begin the signup phase for players. ")]
     StartSignupPhase,
-    #[command(description = "End the signup phase for players. 🟢")]
+    #[command(description = "End the signup phase for players. ")]
     StopSignupPhase,
-    #[command(description = "Start the gaming phase. 🟢")]
+    #[command(description = "Start the gaming phase. ")]
     StartGamingPhase,
 
-    #[command(description = "Stop the gaming phase. 🟢
+    #[command(description = "Stop the gaming phase. 
 
         ")]
     StopGamingPhase,
-    #[command(description = "The core of the game, start a round.🟢")]
+    #[command(description = "The core of the game, start a round.")]
     StartRound,
 
-    #[command(description = "Stop a game round. 🟢
+    #[command(description = "Stop a game round. 
 
         ")]
     StopRound,    
-    #[command(description = "View the list of players who signed up. 🟢")]
+    #[command(description = "View the list of players who signed up. ")]
     ViewSignupList,
-    #[command(description = "View the list of approved players. 🟢")]
+    #[command(description = "View the list of approved players. ")]
     ViewApprovedList,
-    #[command(description = "View the list of refused players. 🟢
+    #[command(description = "View the list of refused players. 
 
         ")]
     ViewRefusedList,
-    #[command(description = "Approve a player's signup request. 🟢")]
+    #[command(description = "Approve a player's signup request. ")]
     ApprovePlayer(String),
-    #[command(description = "Refuse a player's signup request. 🟢
+    #[command(description = "Refuse a player's signup request. 
 
         ")]
     RefusePlayer(String),
-    #[command(description = "Set the channel ID for broadcasting messages. 🟢")]
+    #[command(description = "Set the channel ID for broadcasting messages. ")]
     SetBroadcastChannel,
-    #[command(description = "Set the group channel ID for group-related messages. 🟢")]
+    #[command(description = "Set the group channel ID for group-related messages. ")]
     SetGroupChannel,
-    #[command(description = "Send a message to the broadcast channel. 🟢")]
+    #[command(description = "Send a message to the broadcast channel. ")]
     MsgBroadcastChannel,
-    #[command(description = "Send a message to the group channel. 🟢")]
+    #[command(description = "Send a message to the group channel. ")]
     MsgGroup,
-    #[command(description = "Retrieve the current ID of the group and broadcast channel. 🟢")]
+    #[command(description = "Retrieve the current ID of the group and broadcast channel. ")]
     GetGroupBroadcastId,
-    #[command(description = "Reset the group and broadcast channel settings.  🟢")]
+    #[command(description = "Reset the group and broadcast channel settings.  ")]
     ResetGroupBroadcast,
-    #[command(description = "Read the changelog. 🟢")]
+    #[command(description = "Read the changelog. ")]
     ReadChangelog,
 }
 
