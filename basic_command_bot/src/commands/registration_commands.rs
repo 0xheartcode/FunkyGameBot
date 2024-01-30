@@ -21,7 +21,7 @@ pub async fn approveplayer_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>
         return Ok(());  // Early return if the sender is not authorized
     }
 
-    let player_username = player_username.trim();
+    //let player_username = player_username.trim();
     if player_username.split_whitespace().count() != 1 {
         bot.send_message(msg.chat.id, "The command should be used like this '/approveplayer <username>'. Make sure the player username is correct and pending.").await?;
         return Ok(());
