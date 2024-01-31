@@ -1,3 +1,16 @@
+## January 31 Updates
+
+### Bug Fixes and Improvements
+
+- **Changed Player ID Data Type**: Updated all instances where `player_id` was limited to `i32` to `i64` to accommodate larger Telegram user IDs.
+- **Database Interaction Adjustments**: Verified and adjusted database interactions to ensure they are compatible with `i64` data type for `player_id`.
+
+## January 30 Updates
+
+### Bug Fixes and Improvements
+
+- **Error Handling for Message Sending**: Enhanced error handling in the `approveplayer_command` to catch and log issues when the bot cannot initiate conversation with a user.
+
 ## January 29 Updates
 
 ## Updates and New Features

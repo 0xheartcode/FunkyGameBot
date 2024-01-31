@@ -354,9 +354,9 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
 }
 
 // When you don't receive a message that is a command (starts with /)
-async fn handle_invalid_text_message(bot: Bot, msg: Message) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+async fn handle_invalid_text_message(_bot: Bot, msg: Message) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     if let Some(username) = msg.from().and_then(|user| user.username.clone()) {
-        log::info!("ChatId: {}, Date {} \nFrom: {} Received an invalid text message. \nContent: {}", msg.chat.id, msg.date, username, msg.text().unwrap_or_default());
+        log::info!("ChatId: {}, Date {} \nFrom: {} \nContent: {}", msg.chat.id, msg.date, username, msg.text().unwrap_or_default());
         //log::info!("{:?}",msg);
     }
     //bot.send_message(msg.chat.id, "Received your message, this is not a valid command. Try /help.").await?;

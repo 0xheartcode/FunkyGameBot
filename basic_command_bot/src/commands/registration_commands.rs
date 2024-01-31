@@ -21,7 +21,7 @@ pub async fn approveplayer_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>
         return Ok(());  // Early return if the sender is not authorized
     }
 
-    //let player_username = player_username.trim();
+    let player_username = player_username.trim();
     if player_username.split_whitespace().count() != 1 {
         bot.send_message(msg.chat.id, "The command should be used like this '/approveplayer <username>'. Make sure the player username is correct and pending.").await?;
         return Ok(());
@@ -41,7 +41,19 @@ pub async fn approveplayer_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>
         // Send a message to the player if their ID is not 0
         if player_id != 0 {
             let acceptance_message = format!("Your registration to the new game {} has been accepted!", season_name);
-            bot.send_message(ChatId(player_id.into()), acceptance_message).await?;
+            let send_result = bot.send_message(ChatId(player_id.into()), &acceptance_message).await;
+
+            match send_result {
+                Ok(_) => {
+                    // No action needed for successful message send
+                }
+                Err(e) => {
+                    // Handle other errors
+                    log::error!("Failed to send message: {:?}", e);
+                    log::warn!("Bot can't initiate conversation with user ID: {}", player_id);
+                    bot.send_message(msg.chat.id, "Mmmm, please /start the bot in DMs, so that it can message you.").await?;
+                }
+            }
         }
     } else {
         bot.send_message(msg.chat.id, "No active season found.").await?;
@@ -77,7 +89,7 @@ pub async fn refuseplayer_command(bot: Bot, msg: Message, db_pool: &Arc<DbPool>,
     Ok(())
 }
 
-pub async fn update_player_status_to_accepted(db_pool: &DbPool, season_id: i32, player_username: &str) -> Result<(String, i32), RusqliteError> {
+pub async fn update_player_status_to_accepted(db_pool: &DbPool, season_id: i32, player_username: &str) -> Result<(String, i64), RusqliteError> {
     let mut conn = db_pool.get().expect("Failed to get DB connection");
     let tx = conn.transaction()?;
 
@@ -89,7 +101,7 @@ pub async fn update_player_status_to_accepted(db_pool: &DbPool, season_id: i32, 
 
     if rows_updated > 0 {
         // Fetch the player_id for the accepted player
-        let player_id: i32 = tx.query_row(
+        let player_id: i64 = tx.query_row(
             "SELECT player_id FROM MasterCandidateTable WHERE season_id = ?1 AND player_username = ?2",
             params![season_id, player_username],
             |row| row.get(0),
