@@ -1,6 +1,12 @@
 ![Screenshot](./funkyGameBotImage.png)
 
 =======================================================
+
+THIS IS AN UNFINISHED PROJECT.
+I'M REWRITING IT. WIP
+
+
+=======================================================
 # Funky Game BOT Specs
  
 ## Step 0
@@ -38,13 +44,5 @@ The bot sends the winner his funds.
 The 5% (game fee) can stay in the same address OR can be sent to another address if you like.
 
 -------
-
-# Useful Links:
-
-Bot: https://t.me/FunkyGameBot
-
-Private Funky Masteroom:  https://t.me/+UusdV6pRtWowNDU0
-
-Private Funky Broadcast channel: https://t.me/funkybroadcastchannel
 
 
